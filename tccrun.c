@@ -18,118 +18,118 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "tcc.h"
+#包含 "tcc.h"
 
 /* only native compiler supports -run */
-#ifdef TCC_IS_NATIVE
+#如定义 TCC_IS_NATIVE
 
-#ifndef _WIN32
-# include <sys/mman.h>
-#endif
+#如未定义 _WIN32
+# 包含 <sys/mman.h>
+#了如
 
-#ifdef CONFIG_TCC_BACKTRACE
-# ifndef _WIN32
-#  include <signal.h>
-#  ifndef __OpenBSD__
-#   include <sys/ucontext.h>
-#  endif
-# else
-#  define ucontext_t CONTEXT
-# endif
-ST_DATA int rt_num_callers = 6;
-ST_DATA const char **rt_bound_error_msg;
-ST_DATA void *rt_prog_main;
-static int rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, int level);
-static void rt_error(ucontext_t *uc, const char *fmt, ...);
-static void set_exception_handler(void);
-#endif
+#如定义 CONFIG_TCC_BACKTRACE
+# 如未定义 _WIN32
+#  包含 <signal.h>
+#  如未定义 __OpenBSD__
+#   包含 <sys/ucontext.h>
+#  了如
+# 另
+#  定义 ucontext_t CONTEXT
+# 了如
+ST_DATA 整 rt_num_callers = 6;
+ST_DATA 不变 字 **rt_bound_error_msg;
+ST_DATA 空 *rt_prog_main;
+静态 整 rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, 整 level);
+静态 空 rt_error(ucontext_t *uc, 不变 字 *fmt, ...);
+静态 空 set_exception_handler(空);
+#了如
 
-static void set_pages_executable(void *ptr, unsigned long length);
-static int tcc_relocate_ex(TCCState *s1, void *ptr);
+静态 空 set_pages_executable(空 *ptr, 无符 长 length);
+静态 整 tcc_relocate_ex(TCCState *s1, 空 *ptr);
 
-#ifdef _WIN64
-static void *win64_add_function_table(TCCState *s1);
-static void win64_del_function_table(void *);
-#endif
+#如定义 _WIN64
+静态 空 *win64_add_function_table(TCCState *s1);
+静态 空 win64_del_function_table(空 *);
+#了如
 
-// #define HAVE_SELINUX
+// #定义 HAVE_SELINUX
 
 /* ------------------------------------------------------------- */
 /* Do all relocations (needed before using tcc_get_symbol())
    Returns -1 on error. */
 
-LIBTCCAPI int tcc_relocate(TCCState *s1, void *ptr)
+LIBTCCAPI 整 tcc_relocate(TCCState *s1, 空 *ptr)
 {
-    int size;
+    整 size;
 
-    if (TCC_RELOCATE_AUTO != ptr)
-        return tcc_relocate_ex(s1, ptr);
+    如 (TCC_RELOCATE_AUTO != ptr)
+        返回 tcc_relocate_ex(s1, ptr);
 
     size = tcc_relocate_ex(s1, NULL);
-    if (size < 0)
-        return -1;
+    如 (size < 0)
+        返回 -1;
 
-#ifdef HAVE_SELINUX
+#如定义 HAVE_SELINUX
     /* Use mmap instead of malloc for Selinux. */
     ptr = mmap (NULL, size, PROT_READ|PROT_WRITE,
         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (ptr == MAP_FAILED)
+    如 (ptr == MAP_FAILED)
         tcc_error("tccrun: could not map memory");
-    dynarray_add(&s1->runtime_mem, &s1->nb_runtime_mem, (void*)(addr_t)size);
-#else
+    dynarray_add(&s1->runtime_mem, &s1->nb_runtime_mem, (空*)(addr_t)size);
+#另
     ptr = tcc_malloc(size);
-#endif
+#了如
     tcc_relocate_ex(s1, ptr); /* no more errors expected */
     dynarray_add(&s1->runtime_mem, &s1->nb_runtime_mem, ptr);
-    return 0;
+    返回 0;
 }
 
-ST_FUNC void tcc_run_free(TCCState *s1)
+ST_FUNC 空 tcc_run_free(TCCState *s1)
 {
-    int i;
+    整 i;
 
-    for (i = 0; i < s1->nb_runtime_mem; ++i) {
-#ifdef HAVE_SELINUX
-        unsigned size = (unsigned)(addr_t)s1->runtime_mem[i++];
+    对于 (i = 0; i < s1->nb_runtime_mem; ++i) {
+#如定义 HAVE_SELINUX
+        无符 size = (无符)(addr_t)s1->runtime_mem[i++];
         munmap(s1->runtime_mem[i], size);
-#else
-#ifdef _WIN64
-        win64_del_function_table(*(void**)s1->runtime_mem[i]);
-#endif
+#另
+#如定义 _WIN64
+        win64_del_function_table(*(空**)s1->runtime_mem[i]);
+#了如
         tcc_free(s1->runtime_mem[i]);
-#endif
+#了如
     }
     tcc_free(s1->runtime_mem);
 }
 
 /* launch the compiled program with the given arguments */
-LIBTCCAPI int tcc_run(TCCState *s1, int argc, char **argv)
+LIBTCCAPI 整 tcc_run(TCCState *s1, 整 argc, 字 **argv)
 {
-    int (*prog_main)(int, char **);
+    整 (*prog_main)(整, 字 **);
 
     s1->runtime_main = "main";
-    if ((s1->dflag & 16) && !find_elf_sym(s1->symtab, s1->runtime_main))
-        return 0;
-    if (tcc_relocate(s1, TCC_RELOCATE_AUTO) < 0)
-        return -1;
+    如 ((s1->dflag & 16) && !find_elf_sym(s1->symtab, s1->runtime_main))
+        返回 0;
+    如 (tcc_relocate(s1, TCC_RELOCATE_AUTO) < 0)
+        返回 -1;
     prog_main = tcc_get_symbol_err(s1, s1->runtime_main);
 
-#ifdef CONFIG_TCC_BACKTRACE
-    if (s1->do_debug) {
+#如定义 CONFIG_TCC_BACKTRACE
+    如 (s1->do_debug) {
         set_exception_handler();
         rt_prog_main = prog_main;
     }
-#endif
+#了如
 
     errno = 0; /* clean errno value */
 
-#ifdef CONFIG_TCC_BCHECK
-    if (s1->do_bounds_check) {
-        void (*bound_init)(void);
-        void (*bound_exit)(void);
-        void (*bound_new_region)(void *p, addr_t size);
-        int  (*bound_delete_region)(void *p);
-        int i, ret;
+#如定义 CONFIG_TCC_BCHECK
+    如 (s1->do_bounds_check) {
+        空 (*bound_init)(空);
+        空 (*bound_exit)(空);
+        空 (*bound_new_region)(空 *p, addr_t size);
+        整  (*bound_delete_region)(空 *p);
+        整 i, ret;
 
         /* set error function */
         rt_bound_error_msg = tcc_get_symbol_err(s1, "__bound_error_msg");
@@ -141,193 +141,193 @@ LIBTCCAPI int tcc_run(TCCState *s1, int argc, char **argv)
 
         bound_init();
         /* mark argv area as valid */
-        bound_new_region(argv, argc*sizeof(argv[0]));
-        for (i=0; i<argc; ++i)
+        bound_new_region(argv, argc*求长度(argv[0]));
+        对于 (i=0; i<argc; ++i)
             bound_new_region(argv[i], strlen(argv[i]) + 1);
 
         ret = (*prog_main)(argc, argv);
 
         /* unmark argv area */
-        for (i=0; i<argc; ++i)
+        对于 (i=0; i<argc; ++i)
             bound_delete_region(argv[i]);
         bound_delete_region(argv);
         bound_exit();
-        return ret;
+        返回 ret;
     }
-#endif
-    return (*prog_main)(argc, argv);
+#了如
+    返回 (*prog_main)(argc, argv);
 }
 
-#if defined TCC_TARGET_I386 || defined TCC_TARGET_X86_64
- #define RUN_SECTION_ALIGNMENT 63
-#else
- #define RUN_SECTION_ALIGNMENT 15
-#endif
+#如 已定义 TCC_TARGET_I386 || 已定义 TCC_TARGET_X86_64
+ #定义 RUN_SECTION_ALIGNMENT 63
+#另
+ #定义 RUN_SECTION_ALIGNMENT 15
+#了如
 
 /* relocate code. Return -1 on error, required size if ptr is NULL,
    otherwise copy code into buffer passed by the caller */
-static int tcc_relocate_ex(TCCState *s1, void *ptr)
+静态 整 tcc_relocate_ex(TCCState *s1, 空 *ptr)
 {
     Section *s;
-    unsigned offset, length, fill, i, k;
+    无符 offset, length, fill, i, k;
     addr_t mem;
 
-    if (NULL == ptr) {
+    如 (NULL == ptr) {
         s1->nb_errors = 0;
-#ifdef TCC_TARGET_PE
+#如定义 TCC_TARGET_PE
         pe_output_file(s1, NULL);
-#else
+#另
         tcc_add_runtime(s1);
         relocate_common_syms();
         tcc_add_linker_symbols(s1);
         build_got_entries(s1);
-#endif
-        if (s1->nb_errors)
-            return -1;
+#了如
+        如 (s1->nb_errors)
+            返回 -1;
     }
 
     offset = 0, mem = (addr_t)ptr;
     fill = -mem & RUN_SECTION_ALIGNMENT;
-#ifdef _WIN64
-    offset += sizeof (void*);
-#endif
-    for (k = 0; k < 2; ++k) {
-        for(i = 1; i < s1->nb_sections; i++) {
+#如定义 _WIN64
+    offset += 求长度 (空*);
+#了如
+    对于 (k = 0; k < 2; ++k) {
+        对于(i = 1; i < s1->nb_sections; i++) {
             s = s1->sections[i];
-            if (0 == (s->sh_flags & SHF_ALLOC))
-                continue;
-            if (k != !(s->sh_flags & SHF_EXECINSTR))
-                continue;
+            如 (0 == (s->sh_flags & SHF_ALLOC))
+                继续;
+            如 (k != !(s->sh_flags & SHF_EXECINSTR))
+                继续;
             offset += fill;
             s->sh_addr = mem ? mem + offset : 0;
-#if 0
-            if (mem)
+#如 0
+            如 (mem)
                 printf("%-16s +%02lx %p %04x\n",
-                    s->name, fill, (void*)s->sh_addr, (unsigned)s->data_offset);
-#endif
+                    s->name, fill, (空*)s->sh_addr, (无符)s->data_offset);
+#了如
             offset += s->data_offset;
             fill = -(mem + offset) & 15;
         }
-#if RUN_SECTION_ALIGNMENT > 15
+#如 RUN_SECTION_ALIGNMENT > 15
         /* To avoid that x86 processors would reload cached instructions each time
            when data is written in the near, we need to make sure that code and data
            do not share the same 64 byte unit */
         fill = -(mem + offset) & RUN_SECTION_ALIGNMENT;
-#endif
+#了如
     }
 
     /* relocate symbols */
     relocate_syms(s1, s1->symtab, 1);
-    if (s1->nb_errors)
-        return -1;
+    如 (s1->nb_errors)
+        返回 -1;
 
-    if (0 == mem)
-        return offset + RUN_SECTION_ALIGNMENT;
+    如 (0 == mem)
+        返回 offset + RUN_SECTION_ALIGNMENT;
 
     /* relocate each section */
-    for(i = 1; i < s1->nb_sections; i++) {
+    对于(i = 1; i < s1->nb_sections; i++) {
         s = s1->sections[i];
-        if (s->reloc)
+        如 (s->reloc)
             relocate_section(s1, s);
     }
     relocate_plt(s1);
 
-#ifdef _WIN64
-    *(void**)ptr = win64_add_function_table(s1);
-#endif
+#如定义 _WIN64
+    *(空**)ptr = win64_add_function_table(s1);
+#了如
 
-    for(i = 1; i < s1->nb_sections; i++) {
+    对于(i = 1; i < s1->nb_sections; i++) {
         s = s1->sections[i];
-        if (0 == (s->sh_flags & SHF_ALLOC))
-            continue;
+        如 (0 == (s->sh_flags & SHF_ALLOC))
+            继续;
         length = s->data_offset;
-        ptr = (void*)s->sh_addr;
-        if (NULL == s->data || s->sh_type == SHT_NOBITS)
+        ptr = (空*)s->sh_addr;
+        如 (NULL == s->data || s->sh_type == SHT_NOBITS)
             memset(ptr, 0, length);
-        else
+        另
             memcpy(ptr, s->data, length);
         /* mark executable sections as executable in memory */
-        if (s->sh_flags & SHF_EXECINSTR)
+        如 (s->sh_flags & SHF_EXECINSTR)
             set_pages_executable(ptr, length);
     }
-    return 0;
+    返回 0;
 }
 
 /* ------------------------------------------------------------- */
 /* allow to run code in memory */
 
-static void set_pages_executable(void *ptr, unsigned long length)
+静态 空 set_pages_executable(空 *ptr, 无符 长 length)
 {
-#ifdef _WIN32
-    unsigned long old_protect;
+#如定义 _WIN32
+    无符 长 old_protect;
     VirtualProtect(ptr, length, PAGE_EXECUTE_READWRITE, &old_protect);
-#else
-    void __clear_cache(void *beginning, void *end);
+#另
+    空 __clear_cache(空 *beginning, 空 *end);
     addr_t start, end;
-#ifndef PAGESIZE
-# define PAGESIZE 4096
-#endif
+#如未定义 PAGESIZE
+# 定义 PAGESIZE 4096
+#了如
     start = (addr_t)ptr & ~(PAGESIZE - 1);
     end = (addr_t)ptr + length;
     end = (end + PAGESIZE - 1) & ~(PAGESIZE - 1);
-    if (mprotect((void *)start, end - start, PROT_READ | PROT_WRITE | PROT_EXEC))
+    如 (mprotect((空 *)start, end - start, PROT_READ | PROT_WRITE | PROT_EXEC))
         tcc_error("mprotect failed: did you mean to configure --with-selinux?");
-# if defined TCC_TARGET_ARM || defined TCC_TARGET_ARM64
-    __clear_cache(ptr, (char *)ptr + length);
-# endif
-#endif
+# 如 已定义 TCC_TARGET_ARM || 已定义 TCC_TARGET_ARM64
+    __clear_cache(ptr, (字 *)ptr + length);
+# 了如
+#了如
 }
 
-#ifdef _WIN64
-static void *win64_add_function_table(TCCState *s1)
+#如定义 _WIN64
+静态 空 *win64_add_function_table(TCCState *s1)
 {
-    void *p = NULL;
-    if (s1->uw_pdata) {
-        p = (void*)s1->uw_pdata->sh_addr;
+    空 *p = NULL;
+    如 (s1->uw_pdata) {
+        p = (空*)s1->uw_pdata->sh_addr;
         RtlAddFunctionTable(
             (RUNTIME_FUNCTION*)p,
-            s1->uw_pdata->data_offset / sizeof (RUNTIME_FUNCTION),
+            s1->uw_pdata->data_offset / 求长度 (RUNTIME_FUNCTION),
             text_section->sh_addr
             );
         s1->uw_pdata = NULL;
     }
-    return p;;
+    返回 p;;
 }
 
-static void win64_del_function_table(void *p)
+静态 空 win64_del_function_table(空 *p)
 {
-    if (p) {
+    如 (p) {
         RtlDeleteFunctionTable((RUNTIME_FUNCTION*)p);
     }
 }
-#endif
+#了如
 
 /* ------------------------------------------------------------- */
-#ifdef CONFIG_TCC_BACKTRACE
+#如定义 CONFIG_TCC_BACKTRACE
 
-ST_FUNC void tcc_set_num_callers(int n)
+ST_FUNC 空 tcc_set_num_callers(整 n)
 {
     rt_num_callers = n;
 }
 
 /* print the position in the source file of PC value 'pc' by reading
    the stabs debug information */
-static addr_t rt_printline(addr_t wanted_pc, const char *msg)
+静态 addr_t rt_printline(addr_t wanted_pc, 不变 字 *msg)
 {
-    char func_name[128], last_func_name[128];
+    字 func_name[128], last_func_name[128];
     addr_t func_addr, last_pc, pc;
-    const char *incl_files[INCLUDE_STACK_SIZE];
-    int incl_index, len, last_line_num, i;
-    const char *str, *p;
+    不变 字 *incl_files[INCLUDE_STACK_SIZE];
+    整 incl_index, len, last_line_num, i;
+    不变 字 *str, *p;
 
     Stab_Sym *stab_sym = NULL, *stab_sym_end, *sym;
-    int stab_len = 0;
-    char *stab_str = NULL;
+    整 stab_len = 0;
+    字 *stab_str = NULL;
 
-    if (stab_section) {
+    如 (stab_section) {
         stab_len = stab_section->data_offset;
         stab_sym = (Stab_Sym *)stab_section->data;
-        stab_str = (char *) stabstr_section->data;
+        stab_str = (字 *) stabstr_section->data;
     }
 
     func_name[0] = '\0';
@@ -337,128 +337,128 @@ static addr_t rt_printline(addr_t wanted_pc, const char *msg)
     last_pc = (addr_t)-1;
     last_line_num = 1;
 
-    if (!stab_sym)
-        goto no_stabs;
+    如 (!stab_sym)
+        跳转 no_stabs;
 
-    stab_sym_end = (Stab_Sym*)((char*)stab_sym + stab_len);
-    for (sym = stab_sym + 1; sym < stab_sym_end; ++sym) {
-        switch(sym->n_type) {
+    stab_sym_end = (Stab_Sym*)((字*)stab_sym + stab_len);
+    对于 (sym = stab_sym + 1; sym < stab_sym_end; ++sym) {
+        转接(sym->n_type) {
             /* function start or end */
-        case N_FUN:
-            if (sym->n_strx == 0) {
+        事例 N_FUN:
+            如 (sym->n_strx == 0) {
                 /* we test if between last line and end of function */
                 pc = sym->n_value + func_addr;
-                if (wanted_pc >= last_pc && wanted_pc < pc)
-                    goto found;
+                如 (wanted_pc >= last_pc && wanted_pc < pc)
+                    跳转 found;
                 func_name[0] = '\0';
                 func_addr = 0;
-            } else {
+            } 另 {
                 str = stab_str + sym->n_strx;
                 p = strchr(str, ':');
-                if (!p) {
-                    pstrcpy(func_name, sizeof(func_name), str);
-                } else {
+                如 (!p) {
+                    pstrcpy(func_name, 求长度(func_name), str);
+                } 另 {
                     len = p - str;
-                    if (len > sizeof(func_name) - 1)
-                        len = sizeof(func_name) - 1;
+                    如 (len > 求长度(func_name) - 1)
+                        len = 求长度(func_name) - 1;
                     memcpy(func_name, str, len);
                     func_name[len] = '\0';
                 }
                 func_addr = sym->n_value;
             }
-            break;
+            跳出;
             /* line number info */
-        case N_SLINE:
+        事例 N_SLINE:
             pc = sym->n_value + func_addr;
-            if (wanted_pc >= last_pc && wanted_pc < pc)
-                goto found;
+            如 (wanted_pc >= last_pc && wanted_pc < pc)
+                跳转 found;
             last_pc = pc;
             last_line_num = sym->n_desc;
             /* XXX: slow! */
             strcpy(last_func_name, func_name);
-            break;
+            跳出;
             /* include files */
-        case N_BINCL:
+        事例 N_BINCL:
             str = stab_str + sym->n_strx;
         add_incl:
-            if (incl_index < INCLUDE_STACK_SIZE) {
+            如 (incl_index < INCLUDE_STACK_SIZE) {
                 incl_files[incl_index++] = str;
             }
-            break;
-        case N_EINCL:
-            if (incl_index > 1)
+            跳出;
+        事例 N_EINCL:
+            如 (incl_index > 1)
                 incl_index--;
-            break;
-        case N_SO:
-            if (sym->n_strx == 0) {
+            跳出;
+        事例 N_SO:
+            如 (sym->n_strx == 0) {
                 incl_index = 0; /* end of translation unit */
-            } else {
+            } 另 {
                 str = stab_str + sym->n_strx;
                 /* do not add path */
                 len = strlen(str);
-                if (len > 0 && str[len - 1] != '/')
-                    goto add_incl;
+                如 (len > 0 && str[len - 1] != '/')
+                    跳转 add_incl;
             }
-            break;
+            跳出;
         }
     }
 
 no_stabs:
     /* second pass: we try symtab symbols (no line number info) */
     incl_index = 0;
-    if (symtab_section)
+    如 (symtab_section)
     {
         ElfW(Sym) *sym, *sym_end;
-        int type;
+        整 type;
 
         sym_end = (ElfW(Sym) *)(symtab_section->data + symtab_section->data_offset);
-        for(sym = (ElfW(Sym) *)symtab_section->data + 1;
+        对于(sym = (ElfW(Sym) *)symtab_section->data + 1;
             sym < sym_end;
             sym++) {
             type = ELFW(ST_TYPE)(sym->st_info);
-            if (type == STT_FUNC || type == STT_GNU_IFUNC) {
-                if (wanted_pc >= sym->st_value &&
+            如 (type == STT_FUNC || type == STT_GNU_IFUNC) {
+                如 (wanted_pc >= sym->st_value &&
                     wanted_pc < sym->st_value + sym->st_size) {
-                    pstrcpy(last_func_name, sizeof(last_func_name),
-                            (char *) strtab_section->data + sym->st_name);
+                    pstrcpy(last_func_name, 求长度(last_func_name),
+                            (字 *) strtab_section->data + sym->st_name);
                     func_addr = sym->st_value;
-                    goto found;
+                    跳转 found;
                 }
             }
         }
     }
     /* did not find any info: */
-    fprintf(stderr, "%s %p ???\n", msg, (void*)wanted_pc);
+    fprintf(stderr, "%s %p ???\n", msg, (空*)wanted_pc);
     fflush(stderr);
-    return 0;
+    返回 0;
  found:
     i = incl_index;
-    if (i > 0)
+    如 (i > 0)
         fprintf(stderr, "%s:%d: ", incl_files[--i], last_line_num);
-    fprintf(stderr, "%s %p", msg, (void*)wanted_pc);
-    if (last_func_name[0] != '\0')
+    fprintf(stderr, "%s %p", msg, (空*)wanted_pc);
+    如 (last_func_name[0] != '\0')
         fprintf(stderr, " %s()", last_func_name);
-    if (--i >= 0) {
+    如 (--i >= 0) {
         fprintf(stderr, " (included from ");
-        for (;;) {
+        对于 (;;) {
             fprintf(stderr, "%s", incl_files[i]);
-            if (--i < 0)
-                break;
+            如 (--i < 0)
+                跳出;
             fprintf(stderr, ", ");
         }
         fprintf(stderr, ")");
     }
     fprintf(stderr, "\n");
     fflush(stderr);
-    return func_addr;
+    返回 func_addr;
 }
 
 /* emit a run time error at position 'pc' */
-static void rt_error(ucontext_t *uc, const char *fmt, ...)
+静态 空 rt_error(ucontext_t *uc, 不变 字 *fmt, ...)
 {
     va_list ap;
     addr_t pc;
-    int i;
+    整 i;
 
     fprintf(stderr, "Runtime error: ");
     va_start(ap, fmt);
@@ -466,63 +466,63 @@ static void rt_error(ucontext_t *uc, const char *fmt, ...)
     va_end(ap);
     fprintf(stderr, "\n");
 
-    for(i=0;i<rt_num_callers;i++) {
-        if (rt_get_caller_pc(&pc, uc, i) < 0)
-            break;
+    对于(i=0;i<rt_num_callers;i++) {
+        如 (rt_get_caller_pc(&pc, uc, i) < 0)
+            跳出;
         pc = rt_printline(pc, i ? "by" : "at");
-        if (pc == (addr_t)rt_prog_main && pc)
-            break;
+        如 (pc == (addr_t)rt_prog_main && pc)
+            跳出;
     }
 }
 
 /* ------------------------------------------------------------- */
-#ifndef _WIN32
+#如未定义 _WIN32
 
 /* signal handler for fatal errors */
-static void sig_error(int signum, siginfo_t *siginf, void *puc)
+静态 空 sig_error(整 signum, siginfo_t *siginf, 空 *puc)
 {
     ucontext_t *uc = puc;
 
-    switch(signum) {
-    case SIGFPE:
-        switch(siginf->si_code) {
-        case FPE_INTDIV:
-        case FPE_FLTDIV:
+    转接(signum) {
+    事例 SIGFPE:
+        转接(siginf->si_code) {
+        事例 FPE_INTDIV:
+        事例 FPE_FLTDIV:
             rt_error(uc, "division by zero");
-            break;
-        default:
+            跳出;
+        缺省:
             rt_error(uc, "floating point exception");
-            break;
+            跳出;
         }
-        break;
-    case SIGBUS:
-    case SIGSEGV:
-        if (rt_bound_error_msg && *rt_bound_error_msg)
+        跳出;
+    事例 SIGBUS:
+    事例 SIGSEGV:
+        如 (rt_bound_error_msg && *rt_bound_error_msg)
             rt_error(uc, *rt_bound_error_msg);
-        else
+        另
             rt_error(uc, "dereferencing invalid pointer");
-        break;
-    case SIGILL:
+        跳出;
+    事例 SIGILL:
         rt_error(uc, "illegal instruction");
-        break;
-    case SIGABRT:
+        跳出;
+    事例 SIGABRT:
         rt_error(uc, "abort() called");
-        break;
-    default:
+        跳出;
+    缺省:
         rt_error(uc, "caught signal %d", signum);
-        break;
+        跳出;
     }
     exit(255);
 }
 
-#ifndef SA_SIGINFO
-# define SA_SIGINFO 0x00000004u
-#endif
+#如未定义 SA_SIGINFO
+# 定义 SA_SIGINFO 0x00000004u
+#了如
 
 /* Generate a stack backtrace when a CPU exception occurs. */
-static void set_exception_handler(void)
+静态 空 set_exception_handler(空)
 {
-    struct sigaction sigact;
+    结构 sigaction sigact;
     /* install TCC signal handlers to print debug info on fatal
        runtime errors */
     sigact.sa_flags = SA_SIGINFO | SA_RESETHAND;
@@ -536,286 +536,286 @@ static void set_exception_handler(void)
 }
 
 /* ------------------------------------------------------------- */
-#ifdef __i386__
+#如定义 __i386__
 
 /* fix for glibc 2.1 */
-#ifndef REG_EIP
-#define REG_EIP EIP
-#define REG_EBP EBP
-#endif
+#如未定义 REG_EIP
+#定义 REG_EIP EIP
+#定义 REG_EBP EBP
+#了如
 
 /* return the PC at frame level 'level'. Return negative if not found */
-static int rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, int level)
+静态 整 rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, 整 level)
 {
     addr_t fp;
-    int i;
+    整 i;
 
-    if (level == 0) {
-#if defined(__APPLE__)
+    如 (level == 0) {
+#如 已定义(__APPLE__)
         *paddr = uc->uc_mcontext->__ss.__eip;
-#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
+#另如 已定义(__FreeBSD__) || 已定义(__FreeBSD_kernel__) || 已定义(__DragonFly__)
         *paddr = uc->uc_mcontext.mc_eip;
-#elif defined(__dietlibc__)
+#另如 已定义(__dietlibc__)
         *paddr = uc->uc_mcontext.eip;
-#elif defined(__NetBSD__)
+#另如 已定义(__NetBSD__)
         *paddr = uc->uc_mcontext.__gregs[_REG_EIP];
-#elif defined(__OpenBSD__)
+#另如 已定义(__OpenBSD__)
         *paddr = uc->sc_eip;
-#else
+#另
         *paddr = uc->uc_mcontext.gregs[REG_EIP];
-#endif
-        return 0;
-    } else {
-#if defined(__APPLE__)
+#了如
+        返回 0;
+    } 另 {
+#如 已定义(__APPLE__)
         fp = uc->uc_mcontext->__ss.__ebp;
-#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
+#另如 已定义(__FreeBSD__) || 已定义(__FreeBSD_kernel__) || 已定义(__DragonFly__)
         fp = uc->uc_mcontext.mc_ebp;
-#elif defined(__dietlibc__)
+#另如 已定义(__dietlibc__)
         fp = uc->uc_mcontext.ebp;
-#elif defined(__NetBSD__)
+#另如 已定义(__NetBSD__)
         fp = uc->uc_mcontext.__gregs[_REG_EBP];
-#elif defined(__OpenBSD__)
+#另如 已定义(__OpenBSD__)
         *paddr = uc->sc_ebp;
-#else
+#另
         fp = uc->uc_mcontext.gregs[REG_EBP];
-#endif
-        for(i=1;i<level;i++) {
+#了如
+        对于(i=1;i<level;i++) {
             /* XXX: check address validity with program info */
-            if (fp <= 0x1000 || fp >= 0xc0000000)
-                return -1;
+            如 (fp <= 0x1000 || fp >= 0xc0000000)
+                返回 -1;
             fp = ((addr_t *)fp)[0];
         }
         *paddr = ((addr_t *)fp)[1];
-        return 0;
+        返回 0;
     }
 }
 
 /* ------------------------------------------------------------- */
-#elif defined(__x86_64__)
+#另如 已定义(__x86_64__)
 
 /* return the PC at frame level 'level'. Return negative if not found */
-static int rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, int level)
+静态 整 rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, 整 level)
 {
     addr_t fp;
-    int i;
+    整 i;
 
-    if (level == 0) {
+    如 (level == 0) {
         /* XXX: only support linux */
-#if defined(__APPLE__)
+#如 已定义(__APPLE__)
         *paddr = uc->uc_mcontext->__ss.__rip;
-#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
+#另如 已定义(__FreeBSD__) || 已定义(__FreeBSD_kernel__) || 已定义(__DragonFly__)
         *paddr = uc->uc_mcontext.mc_rip;
-#elif defined(__NetBSD__)
+#另如 已定义(__NetBSD__)
         *paddr = uc->uc_mcontext.__gregs[_REG_RIP];
-#else
+#另
         *paddr = uc->uc_mcontext.gregs[REG_RIP];
-#endif
-        return 0;
-    } else {
-#if defined(__APPLE__)
+#了如
+        返回 0;
+    } 另 {
+#如 已定义(__APPLE__)
         fp = uc->uc_mcontext->__ss.__rbp;
-#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
+#另如 已定义(__FreeBSD__) || 已定义(__FreeBSD_kernel__) || 已定义(__DragonFly__)
         fp = uc->uc_mcontext.mc_rbp;
-#elif defined(__NetBSD__)
+#另如 已定义(__NetBSD__)
         fp = uc->uc_mcontext.__gregs[_REG_RBP];
-#else
+#另
         fp = uc->uc_mcontext.gregs[REG_RBP];
-#endif
-        for(i=1;i<level;i++) {
+#了如
+        对于(i=1;i<level;i++) {
             /* XXX: check address validity with program info */
-            if (fp <= 0x1000)
-                return -1;
+            如 (fp <= 0x1000)
+                返回 -1;
             fp = ((addr_t *)fp)[0];
         }
         *paddr = ((addr_t *)fp)[1];
-        return 0;
+        返回 0;
     }
 }
 
 /* ------------------------------------------------------------- */
-#elif defined(__arm__)
+#另如 已定义(__arm__)
 
 /* return the PC at frame level 'level'. Return negative if not found */
-static int rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, int level)
+静态 整 rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, 整 level)
 {
     addr_t fp, sp;
-    int i;
+    整 i;
 
-    if (level == 0) {
+    如 (level == 0) {
         /* XXX: only supports linux */
-#if defined(__linux__)
+#如 已定义(__linux__)
         *paddr = uc->uc_mcontext.arm_pc;
-#else
-        return -1;
-#endif
-        return 0;
-    } else {
-#if defined(__linux__)
+#另
+        返回 -1;
+#了如
+        返回 0;
+    } 另 {
+#如 已定义(__linux__)
         fp = uc->uc_mcontext.arm_fp;
         sp = uc->uc_mcontext.arm_sp;
-        if (sp < 0x1000)
+        如 (sp < 0x1000)
             sp = 0x1000;
-#else
-        return -1;
-#endif
+#另
+        返回 -1;
+#了如
         /* XXX: specific to tinycc stack frames */
-        if (fp < sp + 12 || fp & 3)
-            return -1;
-        for(i = 1; i < level; i++) {
+        如 (fp < sp + 12 || fp & 3)
+            返回 -1;
+        对于(i = 1; i < level; i++) {
             sp = ((addr_t *)fp)[-2];
-            if (sp < fp || sp - fp > 16 || sp & 3)
-                return -1;
+            如 (sp < fp || sp - fp > 16 || sp & 3)
+                返回 -1;
             fp = ((addr_t *)fp)[-3];
-            if (fp <= sp || fp - sp < 12 || fp & 3)
-                return -1;
+            如 (fp <= sp || fp - sp < 12 || fp & 3)
+                返回 -1;
         }
         /* XXX: check address validity with program info */
         *paddr = ((addr_t *)fp)[-1];
-        return 0;
+        返回 0;
     }
 }
 
 /* ------------------------------------------------------------- */
-#elif defined(__aarch64__)
+#另如 已定义(__aarch64__)
 
-static int rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, int level)
+静态 整 rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, 整 level)
 {
-    if (level < 0)
-        return -1;
-    else if (level == 0) {
+    如 (level < 0)
+        返回 -1;
+    另 如 (level == 0) {
         *paddr = uc->uc_mcontext.pc;
-        return 0;
+        返回 0;
     }
-    else {
+    另 {
         addr_t *fp = (addr_t *)uc->uc_mcontext.regs[29];
-        int i;
-        for (i = 1; i < level; i++)
+        整 i;
+        对于 (i = 1; i < level; i++)
             fp = (addr_t *)fp[0];
         *paddr = fp[1];
-        return 0;
+        返回 0;
     }
 }
 
 /* ------------------------------------------------------------- */
-#else
+#另
 
-#warning add arch specific rt_get_caller_pc()
-static int rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, int level)
+#告警 add arch specific rt_get_caller_pc()
+静态 整 rt_get_caller_pc(addr_t *paddr, ucontext_t *uc, 整 level)
 {
-    return -1;
+    返回 -1;
 }
 
-#endif /* !__i386__ */
+#了如 /* !__i386__ */
 
 /* ------------------------------------------------------------- */
-#else /* WIN32 */
+#另 /* WIN32 */
 
-static long __stdcall cpu_exception_handler(EXCEPTION_POINTERS *ex_info)
+静态 长 __stdcall cpu_exception_handler(EXCEPTION_POINTERS *ex_info)
 {
     EXCEPTION_RECORD *er = ex_info->ExceptionRecord;
     CONTEXT *uc = ex_info->ContextRecord;
-    switch (er->ExceptionCode) {
-    case EXCEPTION_ACCESS_VIOLATION:
-        if (rt_bound_error_msg && *rt_bound_error_msg)
+    转接 (er->ExceptionCode) {
+    事例 EXCEPTION_ACCESS_VIOLATION:
+        如 (rt_bound_error_msg && *rt_bound_error_msg)
             rt_error(uc, *rt_bound_error_msg);
-        else
-	    rt_error(uc, "access violation");
-        break;
-    case EXCEPTION_STACK_OVERFLOW:
+        另
+            rt_error(uc, "access violation");
+        跳出;
+    事例 EXCEPTION_STACK_OVERFLOW:
         rt_error(uc, "stack overflow");
-        break;
-    case EXCEPTION_INT_DIVIDE_BY_ZERO:
+        跳出;
+    事例 EXCEPTION_INT_DIVIDE_BY_ZERO:
         rt_error(uc, "division by zero");
-        break;
-    default:
+        跳出;
+    缺省:
         rt_error(uc, "exception caught");
-        break;
+        跳出;
     }
-    return EXCEPTION_EXECUTE_HANDLER;
+    返回 EXCEPTION_EXECUTE_HANDLER;
 }
 
 /* Generate a stack backtrace when a CPU exception occurs. */
-static void set_exception_handler(void)
+静态 空 set_exception_handler(空)
 {
     SetUnhandledExceptionFilter(cpu_exception_handler);
 }
 
 /* return the PC at frame level 'level'. Return non zero if not found */
-static int rt_get_caller_pc(addr_t *paddr, CONTEXT *uc, int level)
+静态 整 rt_get_caller_pc(addr_t *paddr, CONTEXT *uc, 整 level)
 {
     addr_t fp, pc;
-    int i;
-#ifdef _WIN64
+    整 i;
+#如定义 _WIN64
     pc = uc->Rip;
     fp = uc->Rbp;
-#else
+#另
     pc = uc->Eip;
     fp = uc->Ebp;
-#endif
-    if (level > 0) {
-        for(i=1;i<level;i++) {
-	    /* XXX: check address validity with program info */
-	    if (fp <= 0x1000 || fp >= 0xc0000000)
-		return -1;
-	    fp = ((addr_t*)fp)[0];
-	}
+#了如
+    如 (level > 0) {
+        对于(i=1;i<level;i++) {
+            /* XXX: check address validity with program info */
+            如 (fp <= 0x1000 || fp >= 0xc0000000)
+                返回 -1;
+            fp = ((addr_t*)fp)[0];
+        }
         pc = ((addr_t*)fp)[1];
     }
     *paddr = pc;
-    return 0;
+    返回 0;
 }
 
-#endif /* _WIN32 */
-#endif /* CONFIG_TCC_BACKTRACE */
+#了如 /* _WIN32 */
+#了如 /* CONFIG_TCC_BACKTRACE */
 /* ------------------------------------------------------------- */
-#ifdef CONFIG_TCC_STATIC
+#如定义 CONFIG_TCC_STATIC
 
 /* dummy function for profiling */
-ST_FUNC void *dlopen(const char *filename, int flag)
+ST_FUNC 空 *dlopen(不变 字 *filename, 整 flag)
 {
-    return NULL;
+    返回 NULL;
 }
 
-ST_FUNC void dlclose(void *p)
+ST_FUNC 空 dlclose(空 *p)
 {
 }
 
-ST_FUNC const char *dlerror(void)
+ST_FUNC 不变 字 *dlerror(空)
 {
-    return "error";
+    返回 "error";
 }
 
-typedef struct TCCSyms {
-    char *str;
-    void *ptr;
+类型定义 结构 TCCSyms {
+    字 *str;
+    空 *ptr;
 } TCCSyms;
 
 
 /* add the symbol you want here if no dynamic linking is done */
-static TCCSyms tcc_syms[] = {
-#if !defined(CONFIG_TCCBOOT)
-#define TCCSYM(a) { #a, &a, },
+静态 TCCSyms tcc_syms[] = {
+#如 !已定义(CONFIG_TCCBOOT)
+#定义 TCCSYM(a) { #a, &a, },
     TCCSYM(printf)
     TCCSYM(fprintf)
     TCCSYM(fopen)
     TCCSYM(fclose)
-#undef TCCSYM
-#endif
+#消定义 TCCSYM
+#了如
     { NULL, NULL },
 };
 
-ST_FUNC void *dlsym(void *handle, const char *symbol)
+ST_FUNC 空 *dlsym(空 *handle, 不变 字 *symbol)
 {
     TCCSyms *p;
     p = tcc_syms;
-    while (p->str != NULL) {
-        if (!strcmp(p->str, symbol))
-            return p->ptr;
+    当 (p->str != NULL) {
+        如 (!strcmp(p->str, symbol))
+            返回 p->ptr;
         p++;
     }
-    return NULL;
+    返回 NULL;
 }
 
-#endif /* CONFIG_TCC_STATIC */
-#endif /* TCC_IS_NATIVE */
+#了如 /* CONFIG_TCC_STATIC */
+#了如 /* TCC_IS_NATIVE */
 /* ------------------------------------------------------------- */

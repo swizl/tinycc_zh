@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "tcc.h"
-#if ONE_SOURCE
-# include "libtcc.c"
-#endif
-#include "tcctools.c"
+#包含 "tcc.h"
+#如 ONE_SOURCE
+# 包含 "libtcc.c"
+#了如
+#包含 "tcctools.c"
 
-static const char help[] =
+静态 不变 字 help[] =
     "Tiny C Compiler "TCC_VERSION" - Copyright (C) 2001-2006 Fabrice Bellard\n"
     "Usage: tcc [options...] [-o outfile] [-c] infile(s)...\n"
     "       tcc [options...] -run infile [arguments...]\n"
@@ -55,12 +55,12 @@ static const char help[] =
     "  -Wl,-opt[=val]  set linker option (see tcc -hh)\n"
     "Debugger options:\n"
     "  -g          generate runtime debug info\n"
-#ifdef CONFIG_TCC_BCHECK
+#如定义 CONFIG_TCC_BCHECK
     "  -b          compile with built-in memory and bounds checker (implies -g)\n"
-#endif
-#ifdef CONFIG_TCC_BACKTRACE
+#了如
+#如定义 CONFIG_TCC_BACKTRACE
     "  -bt N       show N callers in stack traces\n"
-#endif
+#了如
     "Misc. options:\n"
     "  -x[c|a|n]   specify type of the next infile\n"
     "  -nostdinc   do not use standard system include paths\n"
@@ -71,12 +71,12 @@ static const char help[] =
     "  -m32/64     defer to i386/x86_64 cross compiler\n"
     "Tools:\n"
     "  create library  : tcc -ar [rcsv] lib.a files\n"
-#ifdef TCC_TARGET_PE
+#如定义 TCC_TARGET_PE
     "  create def file : tcc -impdef lib.dll [-v] [-o lib.def]\n"
-#endif
+#了如
     ;
 
-static const char help2[] =
+静态 不变 字 help2[] =
     "Tiny C Compiler "TCC_VERSION" - More Options\n"
     "Special options:\n"
     "  -P -P1                        with -E: no/alternative #line output\n"
@@ -108,19 +108,19 @@ static const char help2[] =
     "  dollars-in-identifiers        allow '$' in C symbols\n"
     "-m... target specific options:\n"
     "  ms-bitfields                  use MSVC bitfield layout\n"
-#ifdef TCC_TARGET_ARM
+#如定义 TCC_TARGET_ARM
     "  float-abi                     hard/softfp on arm\n"
-#endif
-#ifdef TCC_TARGET_X86_64
+#了如
+#如定义 TCC_TARGET_X86_64
     "  no-sse                        disable floats on x86_64\n"
-#endif
+#了如
     "-Wl,... linker options:\n"
     "  -nostdlib                     do not link with standard crt/libs\n"
     "  -[no-]whole-archive           load lib(s) fully/only as needed\n"
     "  -export-all-symbols           same as -rdynamic\n"
     "  -image-base= -Ttext=          set base address of executable\n"
     "  -section-alignment=           set section alignment in executable\n"
-#ifdef TCC_TARGET_PE
+#如定义 TCC_TARGET_PE
     "  -file-alignment=              set PE file alignment\n"
     "  -stack=                       set PE stack reserve\n"
     "  -large-address-aware          set related PE option\n"
@@ -128,7 +128,7 @@ static const char help2[] =
     "  -oformat=[pe-* binary]        set executable output format\n"
     "Predefined macros:\n"
     "  tcc -E -dM - < nul\n"
-#else
+#另
     "  -rpath=                       set dynamic library search path\n"
     "  -enable-new-dtags             set DT_RUNPATH instead of DT_RPATH\n"
     "  -soname=                      set DT_SONAME elf tag\n"
@@ -137,120 +137,120 @@ static const char help2[] =
     "  -init= -fini= -as-needed -O   (ignored)\n"
     "Predefined macros:\n"
     "  tcc -E -dM - < /dev/null\n"
-#endif
+#了如
     "See also the manual for more details.\n"
     ;
 
-static const char version[] =
+静态 不变 字 version[] =
     "tcc version "TCC_VERSION" ("
-#ifdef TCC_TARGET_I386
+#如定义 TCC_TARGET_I386
         "i386"
-#elif defined TCC_TARGET_X86_64
+#另如 已定义 TCC_TARGET_X86_64
         "x86_64"
-#elif defined TCC_TARGET_C67
+#另如 已定义 TCC_TARGET_C67
         "C67"
-#elif defined TCC_TARGET_ARM
+#另如 已定义 TCC_TARGET_ARM
         "ARM"
-#elif defined TCC_TARGET_ARM64
+#另如 已定义 TCC_TARGET_ARM64
         "AArch64"
-#endif
-#ifdef TCC_ARM_HARDFLOAT
+#了如
+#如定义 TCC_ARM_HARDFLOAT
         " Hard Float"
-#endif
-#ifdef TCC_TARGET_PE
+#了如
+#如定义 TCC_TARGET_PE
         " Windows"
-#elif defined(TCC_TARGET_MACHO)
+#另如 已定义(TCC_TARGET_MACHO)
         " Darwin"
-#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+#另如 已定义(__FreeBSD__) || 已定义(__FreeBSD_kernel__)
         " FreeBSD"
-#else
+#另
         " Linux"
-#endif
+#了如
     ")\n"
     ;
 
-static void print_dirs(const char *msg, char **paths, int nb_paths)
+静态 空 print_dirs(不变 字 *msg, 字 **paths, 整 nb_paths)
 {
-    int i;
+    整 i;
     printf("%s:\n%s", msg, nb_paths ? "" : "  -\n");
-    for(i = 0; i < nb_paths; i++)
+    对于(i = 0; i < nb_paths; i++)
         printf("  %s\n", paths[i]);
 }
 
-static void print_search_dirs(TCCState *s)
+静态 空 print_search_dirs(TCCState *s)
 {
     printf("install: %s\n", s->tcc_lib_path);
     /* print_dirs("programs", NULL, 0); */
     print_dirs("include", s->sysinclude_paths, s->nb_sysinclude_paths);
     print_dirs("libraries", s->library_paths, s->nb_library_paths);
-#ifndef TCC_TARGET_PE
+#如未定义 TCC_TARGET_PE
     print_dirs("crt", s->crt_paths, s->nb_crt_paths);
     printf("libtcc1:\n  %s/"TCC_LIBTCC1"\n", s->tcc_lib_path);
     printf("elfinterp:\n  %s\n",  DEFAULT_ELFINTERP(s));
-#endif
+#了如
 }
 
-static void set_environment(TCCState *s)
+静态 空 set_environment(TCCState *s)
 {
-    char * path;
+    字 * path;
 
     path = getenv("C_INCLUDE_PATH");
-    if(path != NULL) {
+    如(path != NULL) {
         tcc_add_include_path(s, path);
     }
     path = getenv("CPATH");
-    if(path != NULL) {
+    如(path != NULL) {
         tcc_add_include_path(s, path);
     }
     path = getenv("LIBRARY_PATH");
-    if(path != NULL) {
+    如(path != NULL) {
         tcc_add_library_path(s, path);
     }
 }
 
-static char *default_outputfile(TCCState *s, const char *first_file)
+静态 字 *default_outputfile(TCCState *s, 不变 字 *first_file)
 {
-    char buf[1024];
-    char *ext;
-    const char *name = "a";
+    字 buf[1024];
+    字 *ext;
+    不变 字 *name = "a";
 
-    if (first_file && strcmp(first_file, "-"))
+    如 (first_file && strcmp(first_file, "-"))
         name = tcc_basename(first_file);
-    snprintf(buf, sizeof(buf), "%s", name);
+    snprintf(buf, 求长度(buf), "%s", name);
     ext = tcc_fileextension(buf);
-#ifdef TCC_TARGET_PE
-    if (s->output_type == TCC_OUTPUT_DLL)
+#如定义 TCC_TARGET_PE
+    如 (s->output_type == TCC_OUTPUT_DLL)
         strcpy(ext, ".dll");
-    else
-    if (s->output_type == TCC_OUTPUT_EXE)
+    另
+    如 (s->output_type == TCC_OUTPUT_EXE)
         strcpy(ext, ".exe");
-    else
-#endif
-    if (s->output_type == TCC_OUTPUT_OBJ && !s->option_r && *ext)
+    另
+#了如
+    如 (s->output_type == TCC_OUTPUT_OBJ && !s->option_r && *ext)
         strcpy(ext, ".o");
-    else
+    另
         strcpy(buf, "a.out");
-    return tcc_strdup(buf);
+    返回 tcc_strdup(buf);
 }
 
-static unsigned getclock_ms(void)
+静态 无符 getclock_ms(空)
 {
-#ifdef _WIN32
-    return GetTickCount();
-#else
-    struct timeval tv;
+#如定义 _WIN32
+    返回 GetTickCount();
+#另
+    结构 timeval tv;
     gettimeofday(&tv, NULL);
-    return tv.tv_sec*1000 + (tv.tv_usec+500)/1000;
-#endif
+    返回 tv.tv_sec*1000 + (tv.tv_usec+500)/1000;
+#了如
 }
 
-int main(int argc0, char **argv0)
+整 main(整 argc0, 字 **argv0)
 {
     TCCState *s;
-    int ret, opt, n = 0, t = 0;
-    unsigned start_time = 0;
-    const char *first_file;
-    int argc; char **argv;
+    整 ret, opt, n = 0, t = 0;
+    无符 start_time = 0;
+    不变 字 *first_file;
+    整 argc; 字 **argv;
     FILE *ppfp = stdout;
 
 redo:
@@ -258,114 +258,114 @@ redo:
     s = tcc_new();
     opt = tcc_parse_args(s, &argc, &argv, 1);
 
-    if ((n | t) == 0) {
-        if (opt == OPT_HELP)
-            return printf(help), 1;
-        if (opt == OPT_HELP2)
-            return printf(help2), 1;
-        if (opt == OPT_M32 || opt == OPT_M64)
+    如 ((n | t) == 0) {
+        如 (opt == OPT_HELP)
+            返回 printf(help), 1;
+        如 (opt == OPT_HELP2)
+            返回 printf(help2), 1;
+        如 (opt == OPT_M32 || opt == OPT_M64)
             tcc_tool_cross(s, argv, opt); /* never returns */
-        if (s->verbose)
+        如 (s->verbose)
             printf(version);
-        if (opt == OPT_AR)
-            return tcc_tool_ar(s, argc, argv);
-#ifdef TCC_TARGET_PE
-        if (opt == OPT_IMPDEF)
-            return tcc_tool_impdef(s, argc, argv);
-#endif
-        if (opt == OPT_V)
-            return 0;
-        if (opt == OPT_PRINT_DIRS) {
+        如 (opt == OPT_AR)
+            返回 tcc_tool_ar(s, argc, argv);
+#如定义 TCC_TARGET_PE
+        如 (opt == OPT_IMPDEF)
+            返回 tcc_tool_impdef(s, argc, argv);
+#了如
+        如 (opt == OPT_V)
+            返回 0;
+        如 (opt == OPT_PRINT_DIRS) {
             /* initialize search dirs */
             tcc_set_output_type(s, TCC_OUTPUT_MEMORY);
             print_search_dirs(s);
-            return 0;
+            返回 0;
         }
 
         n = s->nb_files;
-        if (n == 0)
+        如 (n == 0)
             tcc_error("no input files\n");
 
-        if (s->output_type == TCC_OUTPUT_PREPROCESS) {
-            if (s->outfile) {
+        如 (s->output_type == TCC_OUTPUT_PREPROCESS) {
+            如 (s->outfile) {
                 ppfp = fopen(s->outfile, "w");
-                if (!ppfp)
+                如 (!ppfp)
                     tcc_error("could not write '%s'", s->outfile);
             }
-        } else if (s->output_type == TCC_OUTPUT_OBJ && !s->option_r) {
-            if (s->nb_libraries)
+        } 另 如 (s->output_type == TCC_OUTPUT_OBJ && !s->option_r) {
+            如 (s->nb_libraries)
                 tcc_error("cannot specify libraries with -c");
-            if (n > 1 && s->outfile)
+            如 (n > 1 && s->outfile)
                 tcc_error("cannot specify output file with -c many files");
-        } else {
-            if (s->option_pthread)
+        } 另 {
+            如 (s->option_pthread)
                 tcc_set_options(s, "-lpthread");
         }
 
-        if (s->do_bench)
+        如 (s->do_bench)
             start_time = getclock_ms();
     }
 
     set_environment(s);
-    if (s->output_type == 0)
+    如 (s->output_type == 0)
         s->output_type = TCC_OUTPUT_EXE;
     tcc_set_output_type(s, s->output_type);
     s->ppfp = ppfp;
 
-    if ((s->output_type == TCC_OUTPUT_MEMORY
+    如 ((s->output_type == TCC_OUTPUT_MEMORY
       || s->output_type == TCC_OUTPUT_PREPROCESS) && (s->dflag & 16))
         s->dflag |= t ? 32 : 0, s->run_test = ++t, n = s->nb_files;
 
     /* compile or add each files or library */
-    for (first_file = NULL, ret = 0;;) {
-        struct filespec *f = s->files[s->nb_files - n];
+    对于 (first_file = NULL, ret = 0;;) {
+        结构 filespec *f = s->files[s->nb_files - n];
         s->filetype = f->type;
         s->alacarte_link = f->alacarte;
-        if (f->type == AFF_TYPE_LIB) {
-            if (tcc_add_library_err(s, f->name) < 0)
+        如 (f->type == AFF_TYPE_LIB) {
+            如 (tcc_add_library_err(s, f->name) < 0)
                 ret = 1;
-        } else {
-            if (1 == s->verbose)
+        } 另 {
+            如 (1 == s->verbose)
                 printf("-> %s\n", f->name);
-            if (!first_file)
+            如 (!first_file)
                 first_file = f->name;
-            if (tcc_add_file(s, f->name) < 0)
+            如 (tcc_add_file(s, f->name) < 0)
                 ret = 1;
         }
         s->filetype = 0;
         s->alacarte_link = 1;
-        if (--n == 0 || ret
+        如 (--n == 0 || ret
             || (s->output_type == TCC_OUTPUT_OBJ && !s->option_r))
-            break;
+            跳出;
     }
 
-    if (s->run_test) {
+    如 (s->run_test) {
         t = 0;
-    } else if (s->output_type == TCC_OUTPUT_PREPROCESS) {
+    } 另 如 (s->output_type == TCC_OUTPUT_PREPROCESS) {
         ;
-    } else if (0 == ret) {
-        if (s->output_type == TCC_OUTPUT_MEMORY) {
-#ifdef TCC_IS_NATIVE
+    } 另 如 (0 == ret) {
+        如 (s->output_type == TCC_OUTPUT_MEMORY) {
+#如定义 TCC_IS_NATIVE
             ret = tcc_run(s, argc, argv);
-#endif
-        } else {
-            if (!s->outfile)
+#了如
+        } 另 {
+            如 (!s->outfile)
                 s->outfile = default_outputfile(s, first_file);
-            if (tcc_output_file(s, s->outfile))
+            如 (tcc_output_file(s, s->outfile))
                 ret = 1;
-            else if (s->gen_deps)
+            另 如 (s->gen_deps)
                 gen_makedeps(s, s->outfile, s->deps_outfile);
         }
     }
 
-    if (s->do_bench && (n | t | ret) == 0)
+    如 (s->do_bench && (n | t | ret) == 0)
         tcc_print_stats(s, getclock_ms() - start_time);
     tcc_delete(s);
-    if (ret == 0 && n)
-        goto redo; /* compile more files with -c */
-    if (t)
-        goto redo; /* run more tests with -dt -run */
-    if (ppfp && ppfp != stdout)
+    如 (ret == 0 && n)
+        跳转 redo; /* compile more files with -c */
+    如 (t)
+        跳转 redo; /* run more tests with -dt -run */
+    如 (ppfp && ppfp != stdout)
         fclose(ppfp);
-    return ret;
+    返回 ret;
 }

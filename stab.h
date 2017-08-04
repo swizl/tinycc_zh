@@ -1,17 +1,17 @@
-#ifndef __GNU_STAB__
+#如未定义 __GNU_STAB__
 
 /* Indicate the GNU stab.h is in use.  */
 
-#define __GNU_STAB__
+#定义 __GNU_STAB__
 
-#define __define_stab(NAME, CODE, STRING) NAME=CODE,
+#定义 __define_stab(NAME, CODE, STRING) NAME=CODE,
 
-enum __stab_debug_code
+枚举 __stab_debug_code
 {
-#include "stab.def"
+#包含 "stab.def"
 LAST_UNUSED_STAB_CODE
 };
 
-#undef __define_stab
+#消定义 __define_stab
 
-#endif /* __GNU_STAB_ */
+#了如 /* __GNU_STAB_ */

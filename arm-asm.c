@@ -4,91 +4,91 @@
  *
  */
 
-#ifdef TARGET_DEFS_ONLY
+#如定义 TARGET_DEFS_ONLY
 
-#define CONFIG_TCC_ASM
-#define NB_ASM_REGS 16
+#定义 CONFIG_TCC_ASM
+#定义 NB_ASM_REGS 16
 
-ST_FUNC void g(int c);
-ST_FUNC void gen_le16(int c);
-ST_FUNC void gen_le32(int c);
+ST_FUNC 空 g(整 c);
+ST_FUNC 空 gen_le16(整 c);
+ST_FUNC 空 gen_le32(整 c);
 
 /*************************************************************/
-#else
+#另
 /*************************************************************/
 
-#include "tcc.h"
+#包含 "tcc.h"
 
-static void asm_error(void)
+静态 空 asm_error(空)
 {
     tcc_error("ARM asm not implemented.");
 }
 
 /* XXX: make it faster ? */
-ST_FUNC void g(int c)
+ST_FUNC 空 g(整 c)
 {
-    int ind1;
-    if (nocode_wanted)
-        return;
+    整 ind1;
+    如 (nocode_wanted)
+        返回;
     ind1 = ind + 1;
-    if (ind1 > cur_text_section->data_allocated)
+    如 (ind1 > cur_text_section->data_allocated)
         section_realloc(cur_text_section, ind1);
     cur_text_section->data[ind] = c;
     ind = ind1;
 }
 
-ST_FUNC void gen_le16 (int i)
+ST_FUNC 空 gen_le16 (整 i)
 {
     g(i);
     g(i>>8);
 }
 
-ST_FUNC void gen_le32 (int i)
+ST_FUNC 空 gen_le32 (整 i)
 {
     gen_le16(i);
     gen_le16(i>>16);
 }
 
-ST_FUNC void gen_expr32(ExprValue *pe)
+ST_FUNC 空 gen_expr32(ExprValue *pe)
 {
     gen_le32(pe->v);
 }
 
-ST_FUNC void asm_opcode(TCCState *s1, int opcode)
+ST_FUNC 空 asm_opcode(TCCState *s1, 整 opcode)
 {
     asm_error();
 }
 
-ST_FUNC void subst_asm_operand(CString *add_str, SValue *sv, int modifier)
+ST_FUNC 空 subst_asm_operand(CString *add_str, SValue *sv, 整 modifier)
 {
     asm_error();
 }
 
 /* generate prolog and epilog code for asm statement */
-ST_FUNC void asm_gen_code(ASMOperand *operands, int nb_operands,
-                         int nb_outputs, int is_output,
+ST_FUNC 空 asm_gen_code(ASMOperand *operands, 整 nb_operands,
+                         整 nb_outputs, 整 is_output,
                          uint8_t *clobber_regs,
-                         int out_reg)
+                         整 out_reg)
 {
 }
 
-ST_FUNC void asm_compute_constraints(ASMOperand *operands,
-                                    int nb_operands, int nb_outputs,
-                                    const uint8_t *clobber_regs,
-                                    int *pout_reg)
+ST_FUNC 空 asm_compute_constraints(ASMOperand *operands,
+                                    整 nb_operands, 整 nb_outputs,
+                                    不变 uint8_t *clobber_regs,
+                                    整 *pout_reg)
 {
 }
 
-ST_FUNC void asm_clobber(uint8_t *clobber_regs, const char *str)
+ST_FUNC 空 asm_clobber(uint8_t *clobber_regs, 不变 字 *str)
 {
     asm_error();
 }
 
-ST_FUNC int asm_parse_regvar (int t)
+ST_FUNC 整 asm_parse_regvar (整 t)
 {
     asm_error();
-    return -1;
+    返回 -1;
 }
 
 /*************************************************************/
-#endif /* ndef TARGET_DEFS_ONLY */
+#了如 /* ndef TARGET_DEFS_ONLY */

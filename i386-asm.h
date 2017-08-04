@@ -472,9 +472,9 @@ ALT(DEF_ASM_OP2(movhps, 0x0f17, 0, OPC_MODRM, OPT_SSE, OPT_EA | OPT_REG32 ))
     DEF_ASM_OP2(sqrtps, 0x0f51, 0, OPC_MODRM, OPT_EA | OPT_SSE, OPT_SSE )
     DEF_ASM_OP2(subps, 0x0f5c, 0, OPC_MODRM, OPT_EA | OPT_SSE, OPT_SSE )
 
-#undef ALT
-#undef DEF_ASM_OP0
-#undef DEF_ASM_OP0L
-#undef DEF_ASM_OP1
-#undef DEF_ASM_OP2
-#undef DEF_ASM_OP3
+#消定义 ALT
+#消定义 DEF_ASM_OP0
+#消定义 DEF_ASM_OP0L
+#消定义 DEF_ASM_OP1
+#消定义 DEF_ASM_OP2
+#消定义 DEF_ASM_OP3

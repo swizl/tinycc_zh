@@ -18,282 +18,282 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "tcc.h"
+#包含 "tcc.h"
 
 /********************************************************/
 /* global variables */
 
 /* use GNU C extensions */
-ST_DATA int gnu_ext = 1;
+ST_DATA 整 gnu_ext = 1;
 
 /* use TinyCC extensions */
-ST_DATA int tcc_ext = 1;
+ST_DATA 整 tcc_ext = 1;
 
 /* XXX: get rid of this ASAP */
-ST_DATA struct TCCState *tcc_state;
+ST_DATA 结构 TCCState *tcc_state;
 
-static int nb_states;
-
-/********************************************************/
-
-#if ONE_SOURCE
-#include "tccpp.c"
-#include "tccgen.c"
-#include "tccelf.c"
-#include "tccrun.c"
-#ifdef TCC_TARGET_I386
-#include "i386-gen.c"
-#include "i386-link.c"
-#include "i386-asm.c"
-#endif
-#ifdef TCC_TARGET_ARM
-#include "arm-gen.c"
-#include "arm-link.c"
-#include "arm-asm.c"
-#endif
-#ifdef TCC_TARGET_ARM64
-#include "arm64-gen.c"
-#include "arm64-link.c"
-#endif
-#ifdef TCC_TARGET_C67
-#include "c67-gen.c"
-#include "c67-link.c"
-#include "tcccoff.c"
-#endif
-#ifdef TCC_TARGET_X86_64
-#include "x86_64-gen.c"
-#include "x86_64-link.c"
-#include "i386-asm.c"
-#endif
-#ifdef CONFIG_TCC_ASM
-#include "tccasm.c"
-#endif
-#ifdef TCC_TARGET_PE
-#include "tccpe.c"
-#endif
-#endif /* ONE_SOURCE */
+静态 整 nb_states;
 
 /********************************************************/
-#ifndef CONFIG_TCC_ASM
-ST_FUNC void asm_instr(void)
+
+#如 ONE_SOURCE
+#包含 "tccpp.c"
+#包含 "tccgen.c"
+#包含 "tccelf.c"
+#包含 "tccrun.c"
+#如定义 TCC_TARGET_I386
+#包含 "i386-gen.c"
+#包含 "i386-link.c"
+#包含 "i386-asm.c"
+#了如
+#如定义 TCC_TARGET_ARM
+#包含 "arm-gen.c"
+#包含 "arm-link.c"
+#包含 "arm-asm.c"
+#了如
+#如定义 TCC_TARGET_ARM64
+#包含 "arm64-gen.c"
+#包含 "arm64-link.c"
+#了如
+#如定义 TCC_TARGET_C67
+#包含 "c67-gen.c"
+#包含 "c67-link.c"
+#包含 "tcccoff.c"
+#了如
+#如定义 TCC_TARGET_X86_64
+#包含 "x86_64-gen.c"
+#包含 "x86_64-link.c"
+#包含 "i386-asm.c"
+#了如
+#如定义 CONFIG_TCC_ASM
+#包含 "tccasm.c"
+#了如
+#如定义 TCC_TARGET_PE
+#包含 "tccpe.c"
+#了如
+#了如 /* ONE_SOURCE */
+
+/********************************************************/
+#如未定义 CONFIG_TCC_ASM
+ST_FUNC 空 asm_instr(空)
 {
     tcc_error("inline asm() not supported");
 }
-ST_FUNC void asm_global_instr(void)
+ST_FUNC 空 asm_global_instr(空)
 {
     tcc_error("inline asm() not supported");
 }
-#endif
+#了如
 
 /********************************************************/
-#ifdef _WIN32
-ST_FUNC char *normalize_slashes(char *path)
+#如定义 _WIN32
+ST_FUNC 字 *normalize_slashes(字 *path)
 {
-    char *p;
-    for (p = path; *p; ++p)
-        if (*p == '\\')
+    字 *p;
+    对于 (p = path; *p; ++p)
+        如 (*p == '\\')
             *p = '/';
-    return path;
+    返回 path;
 }
 
-static HMODULE tcc_module;
+静态 HMODULE tcc_module;
 
 /* on win32, we suppose the lib and includes are at the location of 'tcc.exe' */
-static void tcc_set_lib_path_w32(TCCState *s)
+静态 空 tcc_set_lib_path_w32(TCCState *s)
 {
-    char path[1024], *p;
-    GetModuleFileNameA(tcc_module, path, sizeof path);
+    字 path[1024], *p;
+    GetModuleFileNameA(tcc_module, path, 求长度 path);
     p = tcc_basename(normalize_slashes(strlwr(path)));
-    if (p - 5 > path && 0 == strncmp(p - 5, "/bin/", 5))
+    如 (p - 5 > path && 0 == strncmp(p - 5, "/bin/", 5))
         p -= 5;
-    else if (p > path)
+    另 如 (p > path)
         p--;
     *p = 0;
     tcc_set_lib_path(s, path);
 }
 
-#ifdef TCC_TARGET_PE
-static void tcc_add_systemdir(TCCState *s)
+#如定义 TCC_TARGET_PE
+静态 空 tcc_add_systemdir(TCCState *s)
 {
-    char buf[1000];
-    GetSystemDirectory(buf, sizeof buf);
+    字 buf[1000];
+    GetSystemDirectory(buf, 求长度 buf);
     tcc_add_library_path(s, normalize_slashes(buf));
 }
-#endif
+#了如
 
-#ifdef LIBTCC_AS_DLL
+#如定义 LIBTCC_AS_DLL
 BOOL WINAPI DllMain (HINSTANCE hDll, DWORD dwReason, LPVOID lpReserved)
 {
-    if (DLL_PROCESS_ATTACH == dwReason)
+    如 (DLL_PROCESS_ATTACH == dwReason)
         tcc_module = hDll;
-    return TRUE;
+    返回 TRUE;
 }
-#endif
-#endif
+#了如
+#了如
 
 /********************************************************/
 /* copy a string and truncate it. */
-ST_FUNC char *pstrcpy(char *buf, int buf_size, const char *s)
+ST_FUNC 字 *pstrcpy(字 *buf, 整 buf_size, 不变 字 *s)
 {
-    char *q, *q_end;
-    int c;
+    字 *q, *q_end;
+    整 c;
 
-    if (buf_size > 0) {
+    如 (buf_size > 0) {
         q = buf;
         q_end = buf + buf_size - 1;
-        while (q < q_end) {
+        当 (q < q_end) {
             c = *s++;
-            if (c == '\0')
-                break;
+            如 (c == '\0')
+                跳出;
             *q++ = c;
         }
         *q = '\0';
     }
-    return buf;
+    返回 buf;
 }
 
 /* strcat and truncate. */
-ST_FUNC char *pstrcat(char *buf, int buf_size, const char *s)
+ST_FUNC 字 *pstrcat(字 *buf, 整 buf_size, 不变 字 *s)
 {
-    int len;
+    整 len;
     len = strlen(buf);
-    if (len < buf_size)
+    如 (len < buf_size)
         pstrcpy(buf + len, buf_size - len, s);
-    return buf;
+    返回 buf;
 }
 
-ST_FUNC char *pstrncpy(char *out, const char *in, size_t num)
+ST_FUNC 字 *pstrncpy(字 *out, 不变 字 *in, size_t num)
 {
     memcpy(out, in, num);
     out[num] = '\0';
-    return out;
+    返回 out;
 }
 
 /* extract the basename of a file */
-PUB_FUNC char *tcc_basename(const char *name)
+PUB_FUNC 字 *tcc_basename(不变 字 *name)
 {
-    char *p = strchr(name, 0);
-    while (p > name && !IS_DIRSEP(p[-1]))
+    字 *p = strchr(name, 0);
+    当 (p > name && !IS_DIRSEP(p[-1]))
         --p;
-    return p;
+    返回 p;
 }
 
 /* extract extension part of a file
  *
  * (if no extension, return pointer to end-of-string)
  */
-PUB_FUNC char *tcc_fileextension (const char *name)
+PUB_FUNC 字 *tcc_fileextension (不变 字 *name)
 {
-    char *b = tcc_basename(name);
-    char *e = strrchr(b, '.');
-    return e ? e : strchr(b, 0);
+    字 *b = tcc_basename(name);
+    字 *e = strrchr(b, '.');
+    返回 e ? e : strchr(b, 0);
 }
 
 /********************************************************/
 /* memory management */
 
-#undef free
-#undef malloc
-#undef realloc
+#消定义 free
+#消定义 malloc
+#消定义 realloc
 
-#ifndef MEM_DEBUG
+#如未定义 MEM_DEBUG
 
-PUB_FUNC void tcc_free(void *ptr)
+PUB_FUNC 空 tcc_free(空 *ptr)
 {
     free(ptr);
 }
 
-PUB_FUNC void *tcc_malloc(unsigned long size)
+PUB_FUNC 空 *tcc_malloc(无符 长 size)
 {
-    void *ptr;
+    空 *ptr;
     ptr = malloc(size);
-    if (!ptr && size)
+    如 (!ptr && size)
         tcc_error("memory full (malloc)");
-    return ptr;
+    返回 ptr;
 }
 
-PUB_FUNC void *tcc_mallocz(unsigned long size)
+PUB_FUNC 空 *tcc_mallocz(无符 长 size)
 {
-    void *ptr;
+    空 *ptr;
     ptr = tcc_malloc(size);
     memset(ptr, 0, size);
-    return ptr;
+    返回 ptr;
 }
 
-PUB_FUNC void *tcc_realloc(void *ptr, unsigned long size)
+PUB_FUNC 空 *tcc_realloc(空 *ptr, 无符 长 size)
 {
-    void *ptr1;
+    空 *ptr1;
     ptr1 = realloc(ptr, size);
-    if (!ptr1 && size)
+    如 (!ptr1 && size)
         tcc_error("memory full (realloc)");
-    return ptr1;
+    返回 ptr1;
 }
 
-PUB_FUNC char *tcc_strdup(const char *str)
+PUB_FUNC 字 *tcc_strdup(不变 字 *str)
 {
-    char *ptr;
+    字 *ptr;
     ptr = tcc_malloc(strlen(str) + 1);
     strcpy(ptr, str);
-    return ptr;
+    返回 ptr;
 }
 
-PUB_FUNC void tcc_memcheck(void)
+PUB_FUNC 空 tcc_memcheck(空)
 {
 }
 
-#else
+#另
 
-#define MEM_DEBUG_MAGIC1 0xFEEDDEB1
-#define MEM_DEBUG_MAGIC2 0xFEEDDEB2
-#define MEM_DEBUG_MAGIC3 0xFEEDDEB3
-#define MEM_DEBUG_FILE_LEN 40
-#define MEM_DEBUG_CHECK3(header) \
-    ((mem_debug_header_t*)((char*)header + header->size))->magic3
-#define MEM_USER_PTR(header) \
-    ((char *)header + offsetof(mem_debug_header_t, magic3))
-#define MEM_HEADER_PTR(ptr) \
-    (mem_debug_header_t *)((char*)ptr - offsetof(mem_debug_header_t, magic3))
+#定义 MEM_DEBUG_MAGIC1 0xFEEDDEB1
+#定义 MEM_DEBUG_MAGIC2 0xFEEDDEB2
+#定义 MEM_DEBUG_MAGIC3 0xFEEDDEB3
+#定义 MEM_DEBUG_FILE_LEN 40
+#定义 MEM_DEBUG_CHECK3(header) \
+    ((mem_debug_header_t*)((字*)header + header->size))->magic3
+#定义 MEM_USER_PTR(header) \
+    ((字 *)header + offsetof(mem_debug_header_t, magic3))
+#定义 MEM_HEADER_PTR(ptr) \
+    (mem_debug_header_t *)((字*)ptr - offsetof(mem_debug_header_t, magic3))
 
-struct mem_debug_header {
-    unsigned magic1;
-    unsigned size;
-    struct mem_debug_header *prev;
-    struct mem_debug_header *next;
-    int line_num;
-    char file_name[MEM_DEBUG_FILE_LEN + 1];
-    unsigned magic2;
-    ALIGNED(16) unsigned magic3;
+结构 mem_debug_header {
+    无符 magic1;
+    无符 size;
+    结构 mem_debug_header *prev;
+    结构 mem_debug_header *next;
+    整 line_num;
+    字 file_name[MEM_DEBUG_FILE_LEN + 1];
+    无符 magic2;
+    ALIGNED(16) 无符 magic3;
 };
 
-typedef struct mem_debug_header mem_debug_header_t;
+类型定义 结构 mem_debug_header mem_debug_header_t;
 
-static mem_debug_header_t *mem_debug_chain;
-static unsigned mem_cur_size;
-static unsigned mem_max_size;
+静态 mem_debug_header_t *mem_debug_chain;
+静态 无符 mem_cur_size;
+静态 无符 mem_max_size;
 
-static mem_debug_header_t *malloc_check(void *ptr, const char *msg)
+静态 mem_debug_header_t *malloc_check(空 *ptr, 不变 字 *msg)
 {
     mem_debug_header_t * header = MEM_HEADER_PTR(ptr);
-    if (header->magic1 != MEM_DEBUG_MAGIC1 ||
+    如 (header->magic1 != MEM_DEBUG_MAGIC1 ||
         header->magic2 != MEM_DEBUG_MAGIC2 ||
         MEM_DEBUG_CHECK3(header) != MEM_DEBUG_MAGIC3 ||
-        header->size == (unsigned)-1) {
+        header->size == (无符)-1) {
         fprintf(stderr, "%s check failed\n", msg);
-        if (header->magic1 == MEM_DEBUG_MAGIC1)
+        如 (header->magic1 == MEM_DEBUG_MAGIC1)
             fprintf(stderr, "%s:%u: block allocated here.\n",
                 header->file_name, header->line_num);
         exit(1);
     }
-    return header;
+    返回 header;
 }
 
-PUB_FUNC void *tcc_malloc_debug(unsigned long size, const char *file, int line)
+PUB_FUNC 空 *tcc_malloc_debug(无符 长 size, 不变 字 *file, 整 line)
 {
-    int ofs;
+    整 ofs;
     mem_debug_header_t *header;
 
-    header = malloc(sizeof(mem_debug_header_t) + size);
-    if (!header)
+    header = malloc(求长度(mem_debug_header_t) + size);
+    如 (!header)
         tcc_error("memory full (malloc)");
 
     header->magic1 = MEM_DEBUG_MAGIC1;
@@ -307,167 +307,167 @@ PUB_FUNC void *tcc_malloc_debug(unsigned long size, const char *file, int line)
 
     header->next = mem_debug_chain;
     header->prev = NULL;
-    if (header->next)
+    如 (header->next)
         header->next->prev = header;
     mem_debug_chain = header;
 
     mem_cur_size += size;
-    if (mem_cur_size > mem_max_size)
+    如 (mem_cur_size > mem_max_size)
         mem_max_size = mem_cur_size;
 
-    return MEM_USER_PTR(header);
+    返回 MEM_USER_PTR(header);
 }
 
-PUB_FUNC void tcc_free_debug(void *ptr)
+PUB_FUNC 空 tcc_free_debug(空 *ptr)
 {
     mem_debug_header_t *header;
-    if (!ptr)
-        return;
+    如 (!ptr)
+        返回;
     header = malloc_check(ptr, "tcc_free");
     mem_cur_size -= header->size;
-    header->size = (unsigned)-1;
-    if (header->next)
+    header->size = (无符)-1;
+    如 (header->next)
         header->next->prev = header->prev;
-    if (header->prev)
+    如 (header->prev)
         header->prev->next = header->next;
-    if (header == mem_debug_chain)
+    如 (header == mem_debug_chain)
         mem_debug_chain = header->next;
     free(header);
 }
 
-PUB_FUNC void *tcc_mallocz_debug(unsigned long size, const char *file, int line)
+PUB_FUNC 空 *tcc_mallocz_debug(无符 长 size, 不变 字 *file, 整 line)
 {
-    void *ptr;
+    空 *ptr;
     ptr = tcc_malloc_debug(size,file,line);
     memset(ptr, 0, size);
-    return ptr;
+    返回 ptr;
 }
 
-PUB_FUNC void *tcc_realloc_debug(void *ptr, unsigned long size, const char *file, int line)
+PUB_FUNC 空 *tcc_realloc_debug(空 *ptr, 无符 长 size, 不变 字 *file, 整 line)
 {
     mem_debug_header_t *header;
-    int mem_debug_chain_update = 0;
-    if (!ptr)
-        return tcc_malloc_debug(size, file, line);
+    整 mem_debug_chain_update = 0;
+    如 (!ptr)
+        返回 tcc_malloc_debug(size, file, line);
     header = malloc_check(ptr, "tcc_realloc");
     mem_cur_size -= header->size;
     mem_debug_chain_update = (header == mem_debug_chain);
-    header = realloc(header, sizeof(mem_debug_header_t) + size);
-    if (!header)
+    header = realloc(header, 求长度(mem_debug_header_t) + size);
+    如 (!header)
         tcc_error("memory full (realloc)");
     header->size = size;
     MEM_DEBUG_CHECK3(header) = MEM_DEBUG_MAGIC3;
-    if (header->next)
+    如 (header->next)
         header->next->prev = header;
-    if (header->prev)
+    如 (header->prev)
         header->prev->next = header;
-    if (mem_debug_chain_update)
+    如 (mem_debug_chain_update)
         mem_debug_chain = header;
     mem_cur_size += size;
-    if (mem_cur_size > mem_max_size)
+    如 (mem_cur_size > mem_max_size)
         mem_max_size = mem_cur_size;
-    return MEM_USER_PTR(header);
+    返回 MEM_USER_PTR(header);
 }
 
-PUB_FUNC char *tcc_strdup_debug(const char *str, const char *file, int line)
+PUB_FUNC 字 *tcc_strdup_debug(不变 字 *str, 不变 字 *file, 整 line)
 {
-    char *ptr;
+    字 *ptr;
     ptr = tcc_malloc_debug(strlen(str) + 1, file, line);
     strcpy(ptr, str);
-    return ptr;
+    返回 ptr;
 }
 
-PUB_FUNC void tcc_memcheck(void)
+PUB_FUNC 空 tcc_memcheck(空)
 {
-    if (mem_cur_size) {
+    如 (mem_cur_size) {
         mem_debug_header_t *header = mem_debug_chain;
         fprintf(stderr, "MEM_DEBUG: mem_leak= %d bytes, mem_max_size= %d bytes\n",
             mem_cur_size, mem_max_size);
-        while (header) {
+        当 (header) {
             fprintf(stderr, "%s:%u: error: %u bytes leaked\n",
                 header->file_name, header->line_num, header->size);
             header = header->next;
         }
-#if MEM_DEBUG-0 == 2
+#如 MEM_DEBUG-0 == 2
         exit(2);
-#endif
+#了如
     }
 }
-#endif /* MEM_DEBUG */
+#了如 /* MEM_DEBUG */
 
-#define free(p) use_tcc_free(p)
-#define malloc(s) use_tcc_malloc(s)
-#define realloc(p, s) use_tcc_realloc(p, s)
+#定义 free(p) use_tcc_free(p)
+#定义 malloc(s) use_tcc_malloc(s)
+#定义 realloc(p, s) use_tcc_realloc(p, s)
 
 /********************************************************/
 /* dynarrays */
 
-ST_FUNC void dynarray_add(void *ptab, int *nb_ptr, void *data)
+ST_FUNC 空 dynarray_add(空 *ptab, 整 *nb_ptr, 空 *data)
 {
-    int nb, nb_alloc;
-    void **pp;
+    整 nb, nb_alloc;
+    空 **pp;
 
     nb = *nb_ptr;
-    pp = *(void ***)ptab;
+    pp = *(空 ***)ptab;
     /* every power of two we double array size */
-    if ((nb & (nb - 1)) == 0) {
-        if (!nb)
+    如 ((nb & (nb - 1)) == 0) {
+        如 (!nb)
             nb_alloc = 1;
-        else
+        另
             nb_alloc = nb * 2;
-        pp = tcc_realloc(pp, nb_alloc * sizeof(void *));
-        *(void***)ptab = pp;
+        pp = tcc_realloc(pp, nb_alloc * 求长度(空 *));
+        *(空***)ptab = pp;
     }
     pp[nb++] = data;
     *nb_ptr = nb;
 }
 
-ST_FUNC void dynarray_reset(void *pp, int *n)
+ST_FUNC 空 dynarray_reset(空 *pp, 整 *n)
 {
-    void **p;
-    for (p = *(void***)pp; *n; ++p, --*n)
-        if (*p)
+    空 **p;
+    对于 (p = *(空***)pp; *n; ++p, --*n)
+        如 (*p)
             tcc_free(*p);
-    tcc_free(*(void**)pp);
-    *(void**)pp = NULL;
+    tcc_free(*(空**)pp);
+    *(空**)pp = NULL;
 }
 
-static void tcc_split_path(TCCState *s, void *p_ary, int *p_nb_ary, const char *in)
+静态 空 tcc_split_path(TCCState *s, 空 *p_ary, 整 *p_nb_ary, 不变 字 *in)
 {
-    const char *p;
-    do {
-        int c;
+    不变 字 *p;
+    运行 {
+        整 c;
         CString str;
 
         cstr_new(&str);
-        for (p = in; c = *p, c != '\0' && c != PATHSEP; ++p) {
-            if (c == '{' && p[1] && p[2] == '}') {
+        对于 (p = in; c = *p, c != '\0' && c != PATHSEP; ++p) {
+            如 (c == '{' && p[1] && p[2] == '}') {
                 c = p[1], p += 2;
-                if (c == 'B')
+                如 (c == 'B')
                     cstr_cat(&str, s->tcc_lib_path, -1);
-            } else {
+            } 另 {
                 cstr_ccat(&str, c);
             }
         }
-        if (str.size) {
+        如 (str.size) {
             cstr_ccat(&str, '\0');
             dynarray_add(p_ary, p_nb_ary, tcc_strdup(str.data));
         }
         cstr_free(&str);
         in = p+1;
-    } while (*p);
+    } 当 (*p);
 }
 
 /********************************************************/
 
-static void strcat_vprintf(char *buf, int buf_size, const char *fmt, va_list ap)
+静态 空 strcat_vprintf(字 *buf, 整 buf_size, 不变 字 *fmt, va_list ap)
 {
-    int len;
+    整 len;
     len = strlen(buf);
     vsnprintf(buf + len, buf_size - len, fmt, ap);
 }
 
-static void strcat_printf(char *buf, int buf_size, const char *fmt, ...)
+静态 空 strcat_printf(字 *buf, 整 buf_size, 不变 字 *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -475,59 +475,59 @@ static void strcat_printf(char *buf, int buf_size, const char *fmt, ...)
     va_end(ap);
 }
 
-static void error1(TCCState *s1, int is_warning, const char *fmt, va_list ap)
+静态 空 error1(TCCState *s1, 整 is_warning, 不变 字 *fmt, va_list ap)
 {
-    char buf[2048];
+    字 buf[2048];
     BufferedFile **pf, *f;
 
     buf[0] = '\0';
     /* use upper file if inline ":asm:" or token ":paste:" */
-    for (f = file; f && f->filename[0] == ':'; f = f->prev)
+    对于 (f = file; f && f->filename[0] == ':'; f = f->prev)
      ;
-    if (f) {
-        for(pf = s1->include_stack; pf < s1->include_stack_ptr; pf++)
-            strcat_printf(buf, sizeof(buf), "In file included from %s:%d:\n",
+    如 (f) {
+        对于(pf = s1->include_stack; pf < s1->include_stack_ptr; pf++)
+            strcat_printf(buf, 求长度(buf), "In file included from %s:%d:\n",
                 (*pf)->filename, (*pf)->line_num);
-        if (f->line_num > 0) {
-            strcat_printf(buf, sizeof(buf), "%s:%d: ",
+        如 (f->line_num > 0) {
+            strcat_printf(buf, 求长度(buf), "%s:%d: ",
                 f->filename, f->line_num - !!(tok_flags & TOK_FLAG_BOL));
-        } else {
-            strcat_printf(buf, sizeof(buf), "%s: ",
+        } 另 {
+            strcat_printf(buf, 求长度(buf), "%s: ",
                 f->filename);
         }
-    } else {
-        strcat_printf(buf, sizeof(buf), "tcc: ");
+    } 另 {
+        strcat_printf(buf, 求长度(buf), "tcc: ");
     }
-    if (is_warning)
-        strcat_printf(buf, sizeof(buf), "warning: ");
-    else
-        strcat_printf(buf, sizeof(buf), "error: ");
-    strcat_vprintf(buf, sizeof(buf), fmt, ap);
+    如 (is_warning)
+        strcat_printf(buf, 求长度(buf), "warning: ");
+    另
+        strcat_printf(buf, 求长度(buf), "error: ");
+    strcat_vprintf(buf, 求长度(buf), fmt, ap);
 
-    if (!s1->error_func) {
+    如 (!s1->error_func) {
         /* default case: stderr */
-        if (s1->output_type == TCC_OUTPUT_PREPROCESS && s1->ppfp == stdout)
+        如 (s1->output_type == TCC_OUTPUT_PREPROCESS && s1->ppfp == stdout)
             /* print a newline during tcc -E */
             printf("\n"), fflush(stdout);
         fflush(stdout); /* flush -v output */
         fprintf(stderr, "%s\n", buf);
         fflush(stderr); /* print error/warning now (win32) */
-    } else {
+    } 另 {
         s1->error_func(s1->error_opaque, buf);
     }
-    if (!is_warning || s1->warn_error)
+    如 (!is_warning || s1->warn_error)
         s1->nb_errors++;
 }
 
-LIBTCCAPI void tcc_set_error_func(TCCState *s, void *error_opaque,
-                        void (*error_func)(void *opaque, const char *msg))
+LIBTCCAPI 空 tcc_set_error_func(TCCState *s, 空 *error_opaque,
+                        空 (*error_func)(空 *opaque, 不变 字 *msg))
 {
     s->error_opaque = error_opaque;
     s->error_func = error_func;
 }
 
 /* error without aborting current compilation */
-PUB_FUNC void tcc_error_noabort(const char *fmt, ...)
+PUB_FUNC 空 tcc_error_noabort(不变 字 *fmt, ...)
 {
     TCCState *s1 = tcc_state;
     va_list ap;
@@ -537,7 +537,7 @@ PUB_FUNC void tcc_error_noabort(const char *fmt, ...)
     va_end(ap);
 }
 
-PUB_FUNC void tcc_error(const char *fmt, ...)
+PUB_FUNC 空 tcc_error(不变 字 *fmt, ...)
 {
     TCCState *s1 = tcc_state;
     va_list ap;
@@ -546,21 +546,21 @@ PUB_FUNC void tcc_error(const char *fmt, ...)
     error1(s1, 0, fmt, ap);
     va_end(ap);
     /* better than nothing: in some cases, we accept to handle errors */
-    if (s1->error_set_jmp_enabled) {
+    如 (s1->error_set_jmp_enabled) {
         longjmp(s1->error_jmp_buf, 1);
-    } else {
+    } 另 {
         /* XXX: eliminate this someday */
         exit(1);
     }
 }
 
-PUB_FUNC void tcc_warning(const char *fmt, ...)
+PUB_FUNC 空 tcc_warning(不变 字 *fmt, ...)
 {
     TCCState *s1 = tcc_state;
     va_list ap;
 
-    if (s1->warn_none)
-        return;
+    如 (s1->warn_none)
+        返回;
 
     va_start(ap, fmt);
     error1(s1, 1, fmt, ap);
@@ -570,16 +570,16 @@ PUB_FUNC void tcc_warning(const char *fmt, ...)
 /********************************************************/
 /* I/O layer */
 
-ST_FUNC void tcc_open_bf(TCCState *s1, const char *filename, int initlen)
+ST_FUNC 空 tcc_open_bf(TCCState *s1, 不变 字 *filename, 整 initlen)
 {
     BufferedFile *bf;
-    int buflen = initlen ? initlen : IO_BUF_SIZE;
+    整 buflen = initlen ? initlen : IO_BUF_SIZE;
 
-    bf = tcc_mallocz(sizeof(BufferedFile) + buflen);
+    bf = tcc_mallocz(求长度(BufferedFile) + buflen);
     bf->buf_ptr = bf->buffer;
     bf->buf_end = bf->buffer + initlen;
     bf->buf_end[0] = CH_EOB; /* put eob symbol */
-    pstrcpy(bf->filename, sizeof(bf->filename), filename);
+    pstrcpy(bf->filename, 求长度(bf->filename), filename);
     bf->true_filename = bf->filename;
     bf->line_num = 1;
     bf->ifdef_stack_ptr = s1->ifdef_stack_ptr;
@@ -589,63 +589,63 @@ ST_FUNC void tcc_open_bf(TCCState *s1, const char *filename, int initlen)
     tok_flags = TOK_FLAG_BOL | TOK_FLAG_BOF;
 }
 
-ST_FUNC void tcc_close(void)
+ST_FUNC 空 tcc_close(空)
 {
     BufferedFile *bf = file;
-    if (bf->fd > 0) {
+    如 (bf->fd > 0) {
         close(bf->fd);
         total_lines += bf->line_num;
     }
-    if (bf->true_filename != bf->filename)
+    如 (bf->true_filename != bf->filename)
         tcc_free(bf->true_filename);
     file = bf->prev;
     tcc_free(bf);
 }
 
-ST_FUNC int tcc_open(TCCState *s1, const char *filename)
+ST_FUNC 整 tcc_open(TCCState *s1, 不变 字 *filename)
 {
-    int fd;
-    if (strcmp(filename, "-") == 0)
+    整 fd;
+    如 (strcmp(filename, "-") == 0)
         fd = 0, filename = "<stdin>";
-    else
+    另
         fd = open(filename, O_RDONLY | O_BINARY);
-    if ((s1->verbose == 2 && fd >= 0) || s1->verbose == 3)
+    如 ((s1->verbose == 2 && fd >= 0) || s1->verbose == 3)
         printf("%s %*s%s\n", fd < 0 ? "nf":"->",
-               (int)(s1->include_stack_ptr - s1->include_stack), "", filename);
-    if (fd < 0)
-        return -1;
+               (整)(s1->include_stack_ptr - s1->include_stack), "", filename);
+    如 (fd < 0)
+        返回 -1;
     tcc_open_bf(s1, filename, 0);
-#ifdef _WIN32
+#如定义 _WIN32
     normalize_slashes(file->filename);
-#endif
+#了如
     file->fd = fd;
-    return fd;
+    返回 fd;
 }
 
 /* compile the file opened in 'file'. Return non zero if errors. */
-static int tcc_compile(TCCState *s1)
+静态 整 tcc_compile(TCCState *s1)
 {
     Sym *define_start;
-    int filetype, is_asm;
+    整 filetype, is_asm;
 
     define_start = define_stack;
     filetype = s1->filetype;
     is_asm = filetype == AFF_TYPE_ASM || filetype == AFF_TYPE_ASMPP;
 
-    if (setjmp(s1->error_jmp_buf) == 0) {
+    如 (setjmp(s1->error_jmp_buf) == 0) {
         s1->nb_errors = 0;
         s1->error_set_jmp_enabled = 1;
 
         preprocess_start(s1, is_asm);
-        if (s1->output_type == TCC_OUTPUT_PREPROCESS) {
+        如 (s1->output_type == TCC_OUTPUT_PREPROCESS) {
             tcc_preprocess(s1);
-        } else if (is_asm) {
-#ifdef CONFIG_TCC_ASM
+        } 另 如 (is_asm) {
+#如定义 CONFIG_TCC_ASM
             tcc_assemble(s1, filetype == AFF_TYPE_ASMPP);
-#else
+#另
             tcc_error_noabort("asm not supported");
-#endif
-        } else {
+#了如
+        } 另 {
             tccgen_compile(s1);
         }
     }
@@ -657,27 +657,27 @@ static int tcc_compile(TCCState *s1)
     free_defines(define_start);
     sym_pop(&global_stack, NULL, 0);
     sym_pop(&local_stack, NULL, 0);
-    return s1->nb_errors != 0 ? -1 : 0;
+    返回 s1->nb_errors != 0 ? -1 : 0;
 }
 
-LIBTCCAPI int tcc_compile_string(TCCState *s, const char *str)
+LIBTCCAPI 整 tcc_compile_string(TCCState *s, 不变 字 *str)
 {
-    int len, ret;
+    整 len, ret;
 
     len = strlen(str);
     tcc_open_bf(s, "<string>", len);
     memcpy(file->buffer, str, len);
     ret = tcc_compile(s);
     tcc_close();
-    return ret;
+    返回 ret;
 }
 
 /* define a preprocessor symbol. A value can also be provided with the '=' operator */
-LIBTCCAPI void tcc_define_symbol(TCCState *s1, const char *sym, const char *value)
+LIBTCCAPI 空 tcc_define_symbol(TCCState *s1, 不变 字 *sym, 不变 字 *value)
 {
-    int len1, len2;
+    整 len1, len2;
     /* default value */
-    if (!value)
+    如 (!value)
         value = "1";
     len1 = strlen(sym);
     len2 = strlen(value);
@@ -695,23 +695,23 @@ LIBTCCAPI void tcc_define_symbol(TCCState *s1, const char *sym, const char *valu
 }
 
 /* undefine a preprocessor symbol */
-LIBTCCAPI void tcc_undefine_symbol(TCCState *s1, const char *sym)
+LIBTCCAPI 空 tcc_undefine_symbol(TCCState *s1, 不变 字 *sym)
 {
     TokenSym *ts;
     Sym *s;
     ts = tok_alloc(sym, strlen(sym));
     s = define_find(ts->tok);
     /* undefine symbol by putting an invalid name */
-    if (s)
+    如 (s)
         define_undef(s);
 }
 
 /* cleanup all static data used during compilation */
-static void tcc_cleanup(void)
+静态 空 tcc_cleanup(空)
 {
-    if (NULL == tcc_state)
-        return;
-    while (file)
+    如 (NULL == tcc_state)
+        返回;
+    当 (file)
         tcc_close();
     tccpp_delete(tcc_state);
     tcc_state = NULL;
@@ -721,15 +721,15 @@ static void tcc_cleanup(void)
     sym_free_first = NULL;
 }
 
-LIBTCCAPI TCCState *tcc_new(void)
+LIBTCCAPI TCCState *tcc_new(空)
 {
     TCCState *s;
 
     tcc_cleanup();
 
-    s = tcc_mallocz(sizeof(TCCState));
-    if (!s)
-        return NULL;
+    s = tcc_mallocz(求长度(TCCState));
+    如 (!s)
+        返回 NULL;
     tcc_state = s;
     ++nb_states;
 
@@ -738,21 +738,21 @@ LIBTCCAPI TCCState *tcc_new(void)
     s->warn_implicit_function_declaration = 1;
     s->ms_extensions = 1;
 
-#ifdef CHAR_IS_UNSIGNED
+#如定义 CHAR_IS_UNSIGNED
     s->char_is_unsigned = 1;
-#endif
-#ifdef TCC_TARGET_I386
+#了如
+#如定义 TCC_TARGET_I386
     s->seg_size = 32;
-#endif
+#了如
     /* enable this if you want symbols with leading underscore on windows: */
-#if 0 /* def TCC_TARGET_PE */
+#如 0 /* def TCC_TARGET_PE */
     s->leading_underscore = 1;
-#endif
-#ifdef _WIN32
+#了如
+#如定义 _WIN32
     tcc_set_lib_path_w32(s);
-#else
+#另
     tcc_set_lib_path(s, CONFIG_TCCDIR);
-#endif
+#了如
     tccelf_new(s);
     tccpp_new(s);
 
@@ -765,7 +765,7 @@ LIBTCCAPI TCCState *tcc_new(void)
     define_push(TOK___COUNTER__, MACRO_OBJ, NULL, NULL);
     {
         /* define __TINYC__ 92X  */
-        char buffer[32]; int a,b,c;
+        字 buffer[32]; 整 a,b,c;
         sscanf(TCC_VERSION, "%d.%d.%d", &a, &b, &c);
         sprintf(buffer, "%d", a*10000 + b*100 + c);
         tcc_define_symbol(s, "__TINYC__", buffer);
@@ -777,13 +777,13 @@ LIBTCCAPI TCCState *tcc_new(void)
     tcc_define_symbol(s, "__STDC_HOSTED__", NULL);
 
     /* target defines */
-#if defined(TCC_TARGET_I386)
+#如 已定义(TCC_TARGET_I386)
     tcc_define_symbol(s, "__i386__", NULL);
     tcc_define_symbol(s, "__i386", NULL);
     tcc_define_symbol(s, "i386", NULL);
-#elif defined(TCC_TARGET_X86_64)
+#另如 已定义(TCC_TARGET_X86_64)
     tcc_define_symbol(s, "__x86_64__", NULL);
-#elif defined(TCC_TARGET_ARM)
+#另如 已定义(TCC_TARGET_ARM)
     tcc_define_symbol(s, "__ARM_ARCH_4__", NULL);
     tcc_define_symbol(s, "__arm_elf__", NULL);
     tcc_define_symbol(s, "__arm_elf", NULL);
@@ -793,103 +793,103 @@ LIBTCCAPI TCCState *tcc_new(void)
     tcc_define_symbol(s, "arm", NULL);
     tcc_define_symbol(s, "__APCS_32__", NULL);
     tcc_define_symbol(s, "__ARMEL__", NULL);
-#if defined(TCC_ARM_EABI)
+#如 已定义(TCC_ARM_EABI)
     tcc_define_symbol(s, "__ARM_EABI__", NULL);
-#endif
-#if defined(TCC_ARM_HARDFLOAT)
+#了如
+#如 已定义(TCC_ARM_HARDFLOAT)
     s->float_abi = ARM_HARD_FLOAT;
     tcc_define_symbol(s, "__ARM_PCS_VFP", NULL);
-#else
+#另
     s->float_abi = ARM_SOFTFP_FLOAT;
-#endif
-#elif defined(TCC_TARGET_ARM64)
+#了如
+#另如 已定义(TCC_TARGET_ARM64)
     tcc_define_symbol(s, "__aarch64__", NULL);
-#endif
+#了如
 
-#ifdef TCC_TARGET_PE
+#如定义 TCC_TARGET_PE
     tcc_define_symbol(s, "_WIN32", NULL);
-# ifdef TCC_TARGET_X86_64
+# 如定义 TCC_TARGET_X86_64
     tcc_define_symbol(s, "_WIN64", NULL);
-# endif
-#else
+# 了如
+#另
     tcc_define_symbol(s, "__unix__", NULL);
     tcc_define_symbol(s, "__unix", NULL);
     tcc_define_symbol(s, "unix", NULL);
-# if defined(__linux__)
+# 如 已定义(__linux__)
     tcc_define_symbol(s, "__linux__", NULL);
     tcc_define_symbol(s, "__linux", NULL);
-# endif
-# if defined(__FreeBSD__)
+# 了如
+# 如 已定义(__FreeBSD__)
     tcc_define_symbol(s, "__FreeBSD__", "__FreeBSD__");
     /* No 'Thread Storage Local' on FreeBSD with tcc */
     tcc_define_symbol(s, "__NO_TLS", NULL);
-# endif
-# if defined(__FreeBSD_kernel__)
+# 了如
+# 如 已定义(__FreeBSD_kernel__)
     tcc_define_symbol(s, "__FreeBSD_kernel__", NULL);
-# endif
-#endif
-# if defined(__NetBSD__)
+# 了如
+#了如
+# 如 已定义(__NetBSD__)
     tcc_define_symbol(s, "__NetBSD__", "__NetBSD__");
-# endif
-# if defined(__OpenBSD__)
+# 了如
+# 如 已定义(__OpenBSD__)
     tcc_define_symbol(s, "__OpenBSD__", "__OpenBSD__");
-# endif
+# 了如
 
     /* TinyCC & gcc defines */
-#if defined(TCC_TARGET_PE) && PTR_SIZE == 8
+#如 已定义(TCC_TARGET_PE) && PTR_SIZE == 8
     /* 64bit Windows. */
     tcc_define_symbol(s, "__SIZE_TYPE__", "unsigned long long");
     tcc_define_symbol(s, "__PTRDIFF_TYPE__", "long long");
     tcc_define_symbol(s, "__LLP64__", NULL);
-#elif PTR_SIZE == 8
+#另如 PTR_SIZE == 8
     /* Other 64bit systems. */
     tcc_define_symbol(s, "__SIZE_TYPE__", "unsigned long");
     tcc_define_symbol(s, "__PTRDIFF_TYPE__", "long");
     tcc_define_symbol(s, "__LP64__", NULL);
-#else
+#另
     /* Other 32bit systems. */
     tcc_define_symbol(s, "__SIZE_TYPE__", "unsigned int");
     tcc_define_symbol(s, "__PTRDIFF_TYPE__", "int");
     tcc_define_symbol(s, "__ILP32__", NULL);
-#endif
+#了如
 
-#if defined(TCC_MUSL)
+#如 已定义(TCC_MUSL)
     tcc_define_symbol(s, "__builtin_va_list", "void *");
-#endif /* TCC_MUSL */
+#了如 /* TCC_MUSL */
 
-#ifdef TCC_TARGET_PE
+#如定义 TCC_TARGET_PE
     tcc_define_symbol(s, "__WCHAR_TYPE__", "unsigned short");
     tcc_define_symbol(s, "__WINT_TYPE__", "unsigned short");
-#else
+#另
     tcc_define_symbol(s, "__WCHAR_TYPE__", "int");
     /* wint_t is unsigned int by default, but (signed) int on BSDs
        and unsigned short on windows.  Other OSes might have still
        other conventions, sigh.  */
-# if defined(__FreeBSD__) || defined (__FreeBSD_kernel__) \
-  || defined(__NetBSD__) || defined(__OpenBSD__)
+# 如 已定义(__FreeBSD__) || 已定义 (__FreeBSD_kernel__) \
+  || 已定义(__NetBSD__) || 已定义(__OpenBSD__)
     tcc_define_symbol(s, "__WINT_TYPE__", "int");
-#  ifdef __FreeBSD__
+#  如定义 __FreeBSD__
     /* define __GNUC__ to have some useful stuff from sys/cdefs.h
        that are unconditionally used in FreeBSDs other system headers :/ */
     tcc_define_symbol(s, "__GNUC__", "2");
     tcc_define_symbol(s, "__GNUC_MINOR__", "7");
     tcc_define_symbol(s, "__builtin_alloca", "alloca");
-#  endif
-# else
+#  了如
+# 另
     tcc_define_symbol(s, "__WINT_TYPE__", "unsigned int");
     /* glibc defines */
     tcc_define_symbol(s, "__REDIRECT(name, proto, alias)",
         "name proto __asm__ (#alias)");
     tcc_define_symbol(s, "__REDIRECT_NTH(name, proto, alias)",
         "name proto __asm__ (#alias) __THROW");
-# endif
+# 了如
     /* Some GCC builtins that are simple to express as macros.  */
     tcc_define_symbol(s, "__builtin_extract_return_addr(x)", "x");
-#endif /* ndef TCC_TARGET_PE */
-    return s;
+#了如 /* ndef TCC_TARGET_PE */
+    返回 s;
 }
 
-LIBTCCAPI void tcc_delete(TCCState *s1)
+LIBTCCAPI 空 tcc_delete(TCCState *s1)
 {
     tcc_cleanup();
 
@@ -918,98 +918,98 @@ LIBTCCAPI void tcc_delete(TCCState *s1)
     dynarray_reset(&s1->pragma_libs, &s1->nb_pragma_libs);
     dynarray_reset(&s1->argv, &s1->argc);
 
-#ifdef TCC_IS_NATIVE
+#如定义 TCC_IS_NATIVE
     /* free runtime memory */
     tcc_run_free(s1);
-#endif
+#了如
 
     tcc_free(s1);
-    if (0 == --nb_states)
+    如 (0 == --nb_states)
         tcc_memcheck();
 }
 
-LIBTCCAPI int tcc_set_output_type(TCCState *s, int output_type)
+LIBTCCAPI 整 tcc_set_output_type(TCCState *s, 整 output_type)
 {
     s->output_type = output_type;
 
     /* always elf for objects */
-    if (output_type == TCC_OUTPUT_OBJ)
+    如 (output_type == TCC_OUTPUT_OBJ)
         s->output_format = TCC_OUTPUT_FORMAT_ELF;
 
-    if (s->char_is_unsigned)
+    如 (s->char_is_unsigned)
         tcc_define_symbol(s, "__CHAR_UNSIGNED__", NULL);
 
-    if (!s->nostdinc) {
+    如 (!s->nostdinc) {
         /* default include paths */
         /* -isystem paths have already been handled */
         tcc_add_sysinclude_path(s, CONFIG_TCC_SYSINCLUDEPATHS);
     }
 
-#ifdef CONFIG_TCC_BCHECK
-    if (s->do_bounds_check) {
+#如定义 CONFIG_TCC_BCHECK
+    如 (s->do_bounds_check) {
         /* if bound checking, then add corresponding sections */
         tccelf_bounds_new(s);
         /* define symbol */
         tcc_define_symbol(s, "__BOUNDS_CHECKING_ON", NULL);
     }
-#endif
-    if (s->do_debug) {
+#了如
+    如 (s->do_debug) {
         /* add debug sections */
         tccelf_stab_new(s);
     }
 
     tcc_add_library_path(s, CONFIG_TCC_LIBPATHS);
 
-#ifdef TCC_TARGET_PE
-# ifdef _WIN32
-    if (!s->nostdlib && output_type != TCC_OUTPUT_OBJ)
+#如定义 TCC_TARGET_PE
+# 如定义 _WIN32
+    如 (!s->nostdlib && output_type != TCC_OUTPUT_OBJ)
         tcc_add_systemdir(s);
-# endif
-#else
+# 了如
+#另
     /* paths for crt objects */
     tcc_split_path(s, &s->crt_paths, &s->nb_crt_paths, CONFIG_TCC_CRTPREFIX);
     /* add libc crt1/crti objects */
-    if ((output_type == TCC_OUTPUT_EXE || output_type == TCC_OUTPUT_DLL) &&
+    如 ((output_type == TCC_OUTPUT_EXE || output_type == TCC_OUTPUT_DLL) &&
         !s->nostdlib) {
-        if (output_type != TCC_OUTPUT_DLL)
+        如 (output_type != TCC_OUTPUT_DLL)
             tcc_add_crt(s, "crt1.o");
         tcc_add_crt(s, "crti.o");
     }
-#endif
-    return 0;
+#了如
+    返回 0;
 }
 
-LIBTCCAPI int tcc_add_include_path(TCCState *s, const char *pathname)
+LIBTCCAPI 整 tcc_add_include_path(TCCState *s, 不变 字 *pathname)
 {
     tcc_split_path(s, &s->include_paths, &s->nb_include_paths, pathname);
-    return 0;
+    返回 0;
 }
 
-LIBTCCAPI int tcc_add_sysinclude_path(TCCState *s, const char *pathname)
+LIBTCCAPI 整 tcc_add_sysinclude_path(TCCState *s, 不变 字 *pathname)
 {
     tcc_split_path(s, &s->sysinclude_paths, &s->nb_sysinclude_paths, pathname);
-    return 0;
+    返回 0;
 }
 
-ST_FUNC int tcc_add_file_internal(TCCState *s1, const char *filename, int flags)
+ST_FUNC 整 tcc_add_file_internal(TCCState *s1, 不变 字 *filename, 整 flags)
 {
-    int ret;
+    整 ret;
 
     /* open the file */
     ret = tcc_open(s1, filename);
-    if (ret < 0) {
-        if (flags & AFF_PRINT_ERROR)
+    如 (ret < 0) {
+        如 (flags & AFF_PRINT_ERROR)
             tcc_error_noabort("file '%s' not found", filename);
-        return ret;
+        返回 ret;
     }
 
     /* update target deps */
     dynarray_add(&s1->target_deps, &s1->nb_target_deps,
             tcc_strdup(filename));
 
-    if (flags & AFF_TYPE_BIN) {
+    如 (flags & AFF_TYPE_BIN) {
         ElfW(Ehdr) ehdr;
-        int fd, obj_type;
+        整 fd, obj_type;
 
         fd = file->fd;
         obj_type = tcc_object_type(fd, &ehdr);
@@ -1018,236 +1018,236 @@ ST_FUNC int tcc_add_file_internal(TCCState *s1, const char *filename, int flags)
         /* do not display line number if error */
         file->line_num = 0;
 
-#ifdef TCC_TARGET_MACHO
-        if (0 == obj_type && 0 == strcmp(tcc_fileextension(filename), "dylib"))
+#如定义 TCC_TARGET_MACHO
+        如 (0 == obj_type && 0 == strcmp(tcc_fileextension(filename), "dylib"))
             obj_type = AFF_BINTYPE_DYN;
-#endif
+#了如
 
-        switch (obj_type) {
-        case AFF_BINTYPE_REL:
+        转接 (obj_type) {
+        事例 AFF_BINTYPE_REL:
             ret = tcc_load_object_file(s1, fd, 0);
-            break;
-#ifndef TCC_TARGET_PE
-        case AFF_BINTYPE_DYN:
-            if (s1->output_type == TCC_OUTPUT_MEMORY) {
+            跳出;
+#如未定义 TCC_TARGET_PE
+        事例 AFF_BINTYPE_DYN:
+            如 (s1->output_type == TCC_OUTPUT_MEMORY) {
                 ret = 0;
-#ifdef TCC_IS_NATIVE
-                if (NULL == dlopen(filename, RTLD_GLOBAL | RTLD_LAZY))
+#如定义 TCC_IS_NATIVE
+                如 (NULL == dlopen(filename, RTLD_GLOBAL | RTLD_LAZY))
                     ret = -1;
-#endif
-            } else {
+#了如
+            } 另 {
                 ret = tcc_load_dll(s1, fd, filename,
                                    (flags & AFF_REFERENCED_DLL) != 0);
             }
-            break;
-#endif
-        case AFF_BINTYPE_AR:
+            跳出;
+#了如
+        事例 AFF_BINTYPE_AR:
             ret = tcc_load_archive(s1, fd);
-            break;
-#ifdef TCC_TARGET_COFF
-        case AFF_BINTYPE_C67:
+            跳出;
+#如定义 TCC_TARGET_COFF
+        事例 AFF_BINTYPE_C67:
             ret = tcc_load_coff(s1, fd);
-            break;
-#endif
-        default:
-#ifdef TCC_TARGET_PE
+            跳出;
+#了如
+        缺省:
+#如定义 TCC_TARGET_PE
             ret = pe_load_file(s1, filename, fd);
-#else
+#另
             /* as GNU ld, consider it is an ld script if not recognized */
             ret = tcc_load_ldscript(s1);
-#endif
-            if (ret < 0)
+#了如
+            如 (ret < 0)
                 tcc_error_noabort("unrecognized file type");
-            break;
+            跳出;
         }
-    } else {
+    } 另 {
         ret = tcc_compile(s1);
     }
     tcc_close();
-    return ret;
+    返回 ret;
 }
 
-LIBTCCAPI int tcc_add_file(TCCState *s, const char *filename)
+LIBTCCAPI 整 tcc_add_file(TCCState *s, 不变 字 *filename)
 {
-    int filetype = s->filetype;
-    int flags = AFF_PRINT_ERROR;
-    if (filetype == 0) {
+    整 filetype = s->filetype;
+    整 flags = AFF_PRINT_ERROR;
+    如 (filetype == 0) {
         /* use a file extension to detect a filetype */
-        const char *ext = tcc_fileextension(filename);
-        if (ext[0]) {
+        不变 字 *ext = tcc_fileextension(filename);
+        如 (ext[0]) {
             ext++;
-            if (!strcmp(ext, "S"))
+            如 (!strcmp(ext, "S"))
                 filetype = AFF_TYPE_ASMPP;
-            else if (!strcmp(ext, "s"))
+            另 如 (!strcmp(ext, "s"))
                 filetype = AFF_TYPE_ASM;
-            else if (!PATHCMP(ext, "c") || !PATHCMP(ext, "i"))
+            另 如 (!PATHCMP(ext, "c") || !PATHCMP(ext, "i"))
                 filetype = AFF_TYPE_C;
-            else
+            另
                 flags |= AFF_TYPE_BIN;
-        } else {
+        } 另 {
             filetype = AFF_TYPE_C;
         }
         s->filetype = filetype;
     }
-    return tcc_add_file_internal(s, filename, flags);
+    返回 tcc_add_file_internal(s, filename, flags);
 }
 
-LIBTCCAPI int tcc_add_library_path(TCCState *s, const char *pathname)
+LIBTCCAPI 整 tcc_add_library_path(TCCState *s, 不变 字 *pathname)
 {
     tcc_split_path(s, &s->library_paths, &s->nb_library_paths, pathname);
-    return 0;
+    返回 0;
 }
 
-static int tcc_add_library_internal(TCCState *s, const char *fmt,
-    const char *filename, int flags, char **paths, int nb_paths)
+静态 整 tcc_add_library_internal(TCCState *s, 不变 字 *fmt,
+    不变 字 *filename, 整 flags, 字 **paths, 整 nb_paths)
 {
-    char buf[1024];
-    int i;
+    字 buf[1024];
+    整 i;
 
-    for(i = 0; i < nb_paths; i++) {
-        snprintf(buf, sizeof(buf), fmt, paths[i], filename);
-        if (tcc_add_file_internal(s, buf, flags | AFF_TYPE_BIN) == 0)
-            return 0;
+    对于(i = 0; i < nb_paths; i++) {
+        snprintf(buf, 求长度(buf), fmt, paths[i], filename);
+        如 (tcc_add_file_internal(s, buf, flags | AFF_TYPE_BIN) == 0)
+            返回 0;
     }
-    return -1;
+    返回 -1;
 }
 
 /* find and load a dll. Return non zero if not found */
 /* XXX: add '-rpath' option support ? */
-ST_FUNC int tcc_add_dll(TCCState *s, const char *filename, int flags)
+ST_FUNC 整 tcc_add_dll(TCCState *s, 不变 字 *filename, 整 flags)
 {
-    return tcc_add_library_internal(s, "%s/%s", filename, flags,
+    返回 tcc_add_library_internal(s, "%s/%s", filename, flags,
         s->library_paths, s->nb_library_paths);
 }
 
-ST_FUNC int tcc_add_crt(TCCState *s, const char *filename)
+ST_FUNC 整 tcc_add_crt(TCCState *s, 不变 字 *filename)
 {
-    if (-1 == tcc_add_library_internal(s, "%s/%s",
+    如 (-1 == tcc_add_library_internal(s, "%s/%s",
         filename, 0, s->crt_paths, s->nb_crt_paths))
         tcc_error_noabort("file '%s' not found", filename);
-    return 0;
+    返回 0;
 }
 
 /* the library name is the same as the argument of the '-l' option */
-LIBTCCAPI int tcc_add_library(TCCState *s, const char *libraryname)
+LIBTCCAPI 整 tcc_add_library(TCCState *s, 不变 字 *libraryname)
 {
-#if defined TCC_TARGET_PE
-    const char *libs[] = { "%s/%s.def", "%s/lib%s.def", "%s/%s.dll", "%s/lib%s.dll", "%s/lib%s.a", NULL };
-    const char **pp = s->static_link ? libs + 4 : libs;
-#elif defined TCC_TARGET_MACHO
-    const char *libs[] = { "%s/lib%s.dylib", "%s/lib%s.a", NULL };
-    const char **pp = s->static_link ? libs + 1 : libs;
-#else
-    const char *libs[] = { "%s/lib%s.so", "%s/lib%s.a", NULL };
-    const char **pp = s->static_link ? libs + 1 : libs;
-#endif
-    while (*pp) {
-        if (0 == tcc_add_library_internal(s, *pp,
+#如 已定义 TCC_TARGET_PE
+    不变 字 *libs[] = { "%s/%s.def", "%s/lib%s.def", "%s/%s.dll", "%s/lib%s.dll", "%s/lib%s.a", NULL };
+    不变 字 **pp = s->static_link ? libs + 4 : libs;
+#另如 已定义 TCC_TARGET_MACHO
+    不变 字 *libs[] = { "%s/lib%s.dylib", "%s/lib%s.a", NULL };
+    不变 字 **pp = s->static_link ? libs + 1 : libs;
+#另
+    不变 字 *libs[] = { "%s/lib%s.so", "%s/lib%s.a", NULL };
+    不变 字 **pp = s->static_link ? libs + 1 : libs;
+#了如
+    当 (*pp) {
+        如 (0 == tcc_add_library_internal(s, *pp,
             libraryname, 0, s->library_paths, s->nb_library_paths))
-            return 0;
+            返回 0;
         ++pp;
     }
-    return -1;
+    返回 -1;
 }
 
-PUB_FUNC int tcc_add_library_err(TCCState *s, const char *libname)
+PUB_FUNC 整 tcc_add_library_err(TCCState *s, 不变 字 *libname)
 {
-    int ret = tcc_add_library(s, libname);
-    if (ret < 0)
+    整 ret = tcc_add_library(s, libname);
+    如 (ret < 0)
         tcc_error_noabort("library '%s' not found", libname);
-    return ret;
+    返回 ret;
 }
 
 /* handle #pragma comment(lib,) */
-ST_FUNC void tcc_add_pragma_libs(TCCState *s1)
+ST_FUNC 空 tcc_add_pragma_libs(TCCState *s1)
 {
-    int i;
-    for (i = 0; i < s1->nb_pragma_libs; i++)
+    整 i;
+    对于 (i = 0; i < s1->nb_pragma_libs; i++)
         tcc_add_library_err(s1, s1->pragma_libs[i]);
 }
 
-LIBTCCAPI int tcc_add_symbol(TCCState *s, const char *name, const void *val)
+LIBTCCAPI 整 tcc_add_symbol(TCCState *s, 不变 字 *name, 不变 空 *val)
 {
-#ifdef TCC_TARGET_PE
+#如定义 TCC_TARGET_PE
     /* On x86_64 'val' might not be reachable with a 32bit offset.
        So it is handled here as if it were in a DLL. */
     pe_putimport(s, 0, name, (uintptr_t)val);
-#else
+#另
     set_elf_sym(symtab_section, (uintptr_t)val, 0,
         ELFW(ST_INFO)(STB_GLOBAL, STT_NOTYPE), 0,
         SHN_ABS, name);
-#endif
-    return 0;
+#了如
+    返回 0;
 }
 
-LIBTCCAPI void tcc_set_lib_path(TCCState *s, const char *path)
+LIBTCCAPI 空 tcc_set_lib_path(TCCState *s, 不变 字 *path)
 {
     tcc_free(s->tcc_lib_path);
     s->tcc_lib_path = tcc_strdup(path);
 }
 
-#define WD_ALL    0x0001 /* warning is activated when using -Wall */
-#define FD_INVERT 0x0002 /* invert value before storing */
+#定义 WD_ALL    0x0001 /* warning is activated when using -Wall */
+#定义 FD_INVERT 0x0002 /* invert value before storing */
 
-typedef struct FlagDef {
+类型定义 结构 FlagDef {
     uint16_t offset;
     uint16_t flags;
-    const char *name;
+    不变 字 *name;
 } FlagDef;
 
-static int no_flag(const char **pp)
+静态 整 no_flag(不变 字 **pp)
 {
-    const char *p = *pp;
-    if (*p != 'n' || *++p != 'o' || *++p != '-')
-        return 0;
+    不变 字 *p = *pp;
+    如 (*p != 'n' || *++p != 'o' || *++p != '-')
+        返回 0;
     *pp = p + 1;
-    return 1;
+    返回 1;
 }
 
-ST_FUNC int set_flag(TCCState *s, const FlagDef *flags, const char *name)
+ST_FUNC 整 set_flag(TCCState *s, 不变 FlagDef *flags, 不变 字 *name)
 {
-    int value, ret;
-    const FlagDef *p;
-    const char *r;
+    整 value, ret;
+    不变 FlagDef *p;
+    不变 字 *r;
 
     value = 1;
     r = name;
-    if (no_flag(&r))
+    如 (no_flag(&r))
         value = 0;
 
-    for (ret = -1, p = flags; p->name; ++p) {
-        if (ret) {
-            if (strcmp(r, p->name))
-                continue;
-        } else {
-            if (0 == (p->flags & WD_ALL))
-                continue;
+    对于 (ret = -1, p = flags; p->name; ++p) {
+        如 (ret) {
+            如 (strcmp(r, p->name))
+                继续;
+        } 另 {
+            如 (0 == (p->flags & WD_ALL))
+                继续;
         }
-        if (p->offset) {
-            *(int*)((char *)s + p->offset) =
+        如 (p->offset) {
+            *(整*)((字 *)s + p->offset) =
                 p->flags & FD_INVERT ? !value : value;
-            if (ret)
-                return 0;
-        } else {
+            如 (ret)
+                返回 0;
+        } 另 {
             ret = 0;
         }
     }
-    return ret;
+    返回 ret;
 }
 
-static int strstart(const char *val, const char **str)
+静态 整 strstart(不变 字 *val, 不变 字 **str)
 {
-    const char *p, *q;
+    不变 字 *p, *q;
     p = *str;
     q = val;
-    while (*q) {
-        if (*p != *q)
-            return 0;
+    当 (*q) {
+        如 (*p != *q)
+            返回 0;
         p++;
         q++;
     }
     *str = p;
-    return 1;
+    返回 1;
 }
 
 /* Like strstart, but automatically takes into account that ld options can
@@ -1258,15 +1258,15 @@ static int strstart(const char *val, const char **str)
  *
  * you provide `val` always in 'option[=]' form (no leading -)
  */
-static int link_option(const char *str, const char *val, const char **ptr)
+静态 整 link_option(不变 字 *str, 不变 字 *val, 不变 字 **ptr)
 {
-    const char *p, *q;
-    int ret;
+    不变 字 *p, *q;
+    整 ret;
 
     /* there should be 1 or 2 dashes */
-    if (*str++ != '-')
-        return 0;
-    if (*str == '-')
+    如 (*str++ != '-')
+        返回 0;
+    如 (*str == '-')
         str++;
 
     /* then str & val should match (potentially up to '=') */
@@ -1274,164 +1274,164 @@ static int link_option(const char *str, const char *val, const char **ptr)
     q = val;
 
     ret = 1;
-    if (q[0] == '?') {
+    如 (q[0] == '?') {
         ++q;
-        if (no_flag(&p))
+        如 (no_flag(&p))
             ret = -1;
     }
 
-    while (*q != '\0' && *q != '=') {
-        if (*p != *q)
-            return 0;
+    当 (*q != '\0' && *q != '=') {
+        如 (*p != *q)
+            返回 0;
         p++;
         q++;
     }
 
     /* '=' near eos means ',' or '=' is ok */
-    if (*q == '=') {
-        if (*p == 0)
+    如 (*q == '=') {
+        如 (*p == 0)
             *ptr = p;
-        if (*p != ',' && *p != '=')
-            return 0;
+        如 (*p != ',' && *p != '=')
+            返回 0;
         p++;
-    } else if (*p) {
-        return 0;
+    } 另 如 (*p) {
+        返回 0;
     }
     *ptr = p;
-    return ret;
+    返回 ret;
 }
 
-static const char *skip_linker_arg(const char **str)
+静态 不变 字 *skip_linker_arg(不变 字 **str)
 {
-    const char *s1 = *str;
-    const char *s2 = strchr(s1, ',');
+    不变 字 *s1 = *str;
+    不变 字 *s2 = strchr(s1, ',');
     *str = s2 ? s2++ : (s2 = s1 + strlen(s1));
-    return s2;
+    返回 s2;
 }
 
-static void copy_linker_arg(char **pp, const char *s, int sep)
+静态 空 copy_linker_arg(字 **pp, 不变 字 *s, 整 sep)
 {
-    const char *q = s;
-    char *p = *pp;
-    int l = 0;
-    if (p && sep)
+    不变 字 *q = s;
+    字 *p = *pp;
+    整 l = 0;
+    如 (p && sep)
         p[l = strlen(p)] = sep, ++l;
     skip_linker_arg(&q);
     pstrncpy(l + (*pp = tcc_realloc(p, q - s + l + 1)), s, q - s);
 }
 
 /* set linker options */
-static int tcc_set_linker(TCCState *s, const char *option)
+静态 整 tcc_set_linker(TCCState *s, 不变 字 *option)
 {
-    while (*option) {
+    当 (*option) {
 
-        const char *p = NULL;
-        char *end = NULL;
-        int ignoring = 0;
-        int ret;
+        不变 字 *p = NULL;
+        字 *end = NULL;
+        整 ignoring = 0;
+        整 ret;
 
-        if (link_option(option, "Bsymbolic", &p)) {
+        如 (link_option(option, "Bsymbolic", &p)) {
             s->symbolic = 1;
-        } else if (link_option(option, "nostdlib", &p)) {
+        } 另 如 (link_option(option, "nostdlib", &p)) {
             s->nostdlib = 1;
-        } else if (link_option(option, "fini=", &p)) {
+        } 另 如 (link_option(option, "fini=", &p)) {
             copy_linker_arg(&s->fini_symbol, p, 0);
             ignoring = 1;
-        } else if (link_option(option, "image-base=", &p)
+        } 另 如 (link_option(option, "image-base=", &p)
                 || link_option(option, "Ttext=", &p)) {
             s->text_addr = strtoull(p, &end, 16);
             s->has_text_addr = 1;
-        } else if (link_option(option, "init=", &p)) {
+        } 另 如 (link_option(option, "init=", &p)) {
             copy_linker_arg(&s->init_symbol, p, 0);
             ignoring = 1;
-        } else if (link_option(option, "oformat=", &p)) {
-#if defined(TCC_TARGET_PE)
-            if (strstart("pe-", &p)) {
-#elif PTR_SIZE == 8
-            if (strstart("elf64-", &p)) {
-#else
-            if (strstart("elf32-", &p)) {
-#endif
+        } 另 如 (link_option(option, "oformat=", &p)) {
+#如 已定义(TCC_TARGET_PE)
+            如 (strstart("pe-", &p)) {
+#另如 PTR_SIZE == 8
+            如 (strstart("elf64-", &p)) {
+#另
+            如 (strstart("elf32-", &p)) {
+#了如
                 s->output_format = TCC_OUTPUT_FORMAT_ELF;
-            } else if (!strcmp(p, "binary")) {
+            } 另 如 (!strcmp(p, "binary")) {
                 s->output_format = TCC_OUTPUT_FORMAT_BINARY;
-#ifdef TCC_TARGET_COFF
-            } else if (!strcmp(p, "coff")) {
+#如定义 TCC_TARGET_COFF
+            } 另 如 (!strcmp(p, "coff")) {
                 s->output_format = TCC_OUTPUT_FORMAT_COFF;
-#endif
-            } else
-                goto err;
+#了如
+            } 另
+                跳转 err;
 
-        } else if (link_option(option, "as-needed", &p)) {
+        } 另 如 (link_option(option, "as-needed", &p)) {
             ignoring = 1;
-        } else if (link_option(option, "O", &p)) {
+        } 另 如 (link_option(option, "O", &p)) {
             ignoring = 1;
-        } else if (link_option(option, "export-all-symbols", &p)) {
+        } 另 如 (link_option(option, "export-all-symbols", &p)) {
             s->rdynamic = 1;
-        } else if (link_option(option, "rpath=", &p)) {
+        } 另 如 (link_option(option, "rpath=", &p)) {
             copy_linker_arg(&s->rpath, p, ':');
-        } else if (link_option(option, "enable-new-dtags", &p)) {
+        } 另 如 (link_option(option, "enable-new-dtags", &p)) {
             s->enable_new_dtags = 1;
-        } else if (link_option(option, "section-alignment=", &p)) {
+        } 另 如 (link_option(option, "section-alignment=", &p)) {
             s->section_align = strtoul(p, &end, 16);
-        } else if (link_option(option, "soname=", &p)) {
+        } 另 如 (link_option(option, "soname=", &p)) {
             copy_linker_arg(&s->soname, p, 0);
-#ifdef TCC_TARGET_PE
-        } else if (link_option(option, "large-address-aware", &p)) {
+#如定义 TCC_TARGET_PE
+        } 另 如 (link_option(option, "large-address-aware", &p)) {
             s->pe_characteristics |= 0x20;
-        } else if (link_option(option, "file-alignment=", &p)) {
+        } 另 如 (link_option(option, "file-alignment=", &p)) {
             s->pe_file_align = strtoul(p, &end, 16);
-        } else if (link_option(option, "stack=", &p)) {
+        } 另 如 (link_option(option, "stack=", &p)) {
             s->pe_stack_size = strtoul(p, &end, 10);
-        } else if (link_option(option, "subsystem=", &p)) {
-#if defined(TCC_TARGET_I386) || defined(TCC_TARGET_X86_64)
-            if (!strcmp(p, "native")) {
+        } 另 如 (link_option(option, "subsystem=", &p)) {
+#如 已定义(TCC_TARGET_I386) || 已定义(TCC_TARGET_X86_64)
+            如 (!strcmp(p, "native")) {
                 s->pe_subsystem = 1;
-            } else if (!strcmp(p, "console")) {
+            } 另 如 (!strcmp(p, "console")) {
                 s->pe_subsystem = 3;
-            } else if (!strcmp(p, "gui") || !strcmp(p, "windows")) {
+            } 另 如 (!strcmp(p, "gui") || !strcmp(p, "windows")) {
                 s->pe_subsystem = 2;
-            } else if (!strcmp(p, "posix")) {
+            } 另 如 (!strcmp(p, "posix")) {
                 s->pe_subsystem = 7;
-            } else if (!strcmp(p, "efiapp")) {
+            } 另 如 (!strcmp(p, "efiapp")) {
                 s->pe_subsystem = 10;
-            } else if (!strcmp(p, "efiboot")) {
+            } 另 如 (!strcmp(p, "efiboot")) {
                 s->pe_subsystem = 11;
-            } else if (!strcmp(p, "efiruntime")) {
+            } 另 如 (!strcmp(p, "efiruntime")) {
                 s->pe_subsystem = 12;
-            } else if (!strcmp(p, "efirom")) {
+            } 另 如 (!strcmp(p, "efirom")) {
                 s->pe_subsystem = 13;
-#elif defined(TCC_TARGET_ARM)
-            if (!strcmp(p, "wince")) {
+#另如 已定义(TCC_TARGET_ARM)
+            如 (!strcmp(p, "wince")) {
                 s->pe_subsystem = 9;
-#endif
-            } else
-                goto err;
-#endif
-        } else if (ret = link_option(option, "?whole-archive", &p), ret) {
+#了如
+            } 另
+                跳转 err;
+#了如
+        } 另 如 (ret = link_option(option, "?whole-archive", &p), ret) {
             s->alacarte_link = ret < 0;
-        } else if (p) {
-            return 0;
-        } else {
+        } 另 如 (p) {
+            返回 0;
+        } 另 {
     err:
             tcc_error("unsupported linker option '%s'", option);
         }
 
-        if (ignoring && s->warn_unsupported)
+        如 (ignoring && s->warn_unsupported)
             tcc_warning("unsupported linker option '%s'", option);
 
         option = skip_linker_arg(&p);
     }
-    return 1;
+    返回 1;
 }
 
-typedef struct TCCOption {
-    const char *name;
+类型定义 结构 TCCOption {
+    不变 字 *name;
     uint16_t index;
     uint16_t flags;
 } TCCOption;
 
-enum {
+枚举 {
     TCC_OPTION_HELP,
     TCC_OPTION_HELP2,
     TCC_OPTION_v,
@@ -1485,10 +1485,10 @@ enum {
     TCC_OPTION_impdef
 };
 
-#define TCC_OPTION_HAS_ARG 0x0001
-#define TCC_OPTION_NOSEP   0x0002 /* cannot have space before option and arg */
+#定义 TCC_OPTION_HAS_ARG 0x0001
+#定义 TCC_OPTION_NOSEP   0x0002 /* cannot have space before option and arg */
 
-static const TCCOption tcc_options[] = {
+静态 不变 TCCOption tcc_options[] = {
     { "h", TCC_OPTION_HELP, 0 },
     { "-help", TCC_OPTION_HELP, 0 },
     { "?", TCC_OPTION_HELP, 0 },
@@ -1502,12 +1502,12 @@ static const TCCOption tcc_options[] = {
     { "B", TCC_OPTION_B, TCC_OPTION_HAS_ARG },
     { "l", TCC_OPTION_l, TCC_OPTION_HAS_ARG | TCC_OPTION_NOSEP },
     { "bench", TCC_OPTION_bench, 0 },
-#ifdef CONFIG_TCC_BACKTRACE
+#如定义 CONFIG_TCC_BACKTRACE
     { "bt", TCC_OPTION_bt, TCC_OPTION_HAS_ARG },
-#endif
-#ifdef CONFIG_TCC_BCHECK
+#了如
+#如定义 CONFIG_TCC_BCHECK
     { "b", TCC_OPTION_b, 0 },
-#endif
+#了如
     { "g", TCC_OPTION_g, TCC_OPTION_HAS_ARG | TCC_OPTION_NOSEP },
     { "c", TCC_OPTION_c, 0 },
     { "dumpversion", TCC_OPTION_dumpversion, 0},
@@ -1529,9 +1529,9 @@ static const TCCOption tcc_options[] = {
     { "Wp,", TCC_OPTION_Wp, TCC_OPTION_HAS_ARG | TCC_OPTION_NOSEP },
     { "W", TCC_OPTION_W, TCC_OPTION_HAS_ARG | TCC_OPTION_NOSEP },
     { "O", TCC_OPTION_O, TCC_OPTION_HAS_ARG | TCC_OPTION_NOSEP },
-#ifdef TCC_TARGET_ARM
+#如定义 TCC_TARGET_ARM
     { "mfloat-abi", TCC_OPTION_mfloat_abi, TCC_OPTION_HAS_ARG },
-#endif
+#了如
     { "m", TCC_OPTION_m, TCC_OPTION_HAS_ARG | TCC_OPTION_NOSEP },
     { "f", TCC_OPTION_f, TCC_OPTION_HAS_ARG | TCC_OPTION_NOSEP },
     { "isystem", TCC_OPTION_isystem, TCC_OPTION_HAS_ARG },
@@ -1547,13 +1547,13 @@ static const TCCOption tcc_options[] = {
     { "MF", TCC_OPTION_MF, TCC_OPTION_HAS_ARG },
     { "x", TCC_OPTION_x, TCC_OPTION_HAS_ARG },
     { "ar", TCC_OPTION_ar, 0},
-#ifdef TCC_TARGET_PE
+#如定义 TCC_TARGET_PE
     { "impdef", TCC_OPTION_impdef, 0},
-#endif
+#了如
     { NULL, 0, 0 },
 };
 
-static const FlagDef options_W[] = {
+静态 不变 FlagDef options_W[] = {
     { 0, 0, "all" },
     { offsetof(TCCState, warn_unsupported), 0, "unsupported" },
     { offsetof(TCCState, warn_write_strings), 0, "write-strings" },
@@ -1564,7 +1564,7 @@ static const FlagDef options_W[] = {
     { 0, 0, NULL }
 };
 
-static const FlagDef options_f[] = {
+静态 不变 FlagDef options_f[] = {
     { offsetof(TCCState, char_is_unsigned), 0, "unsigned-char" },
     { offsetof(TCCState, char_is_unsigned), FD_INVERT, "signed-char" },
     { offsetof(TCCState, nocommon), FD_INVERT, "common" },
@@ -1574,53 +1574,53 @@ static const FlagDef options_f[] = {
     { 0, 0, NULL }
 };
 
-static const FlagDef options_m[] = {
+静态 不变 FlagDef options_m[] = {
     { offsetof(TCCState, ms_bitfields), 0, "ms-bitfields" },
-#ifdef TCC_TARGET_X86_64
+#如定义 TCC_TARGET_X86_64
     { offsetof(TCCState, nosse), FD_INVERT, "sse" },
-#endif
+#了如
     { 0, 0, NULL }
 };
 
-static void parse_option_D(TCCState *s1, const char *optarg)
+静态 空 parse_option_D(TCCState *s1, 不变 字 *optarg)
 {
-    char *sym = tcc_strdup(optarg);
-    char *value = strchr(sym, '=');
-    if (value)
+    字 *sym = tcc_strdup(optarg);
+    字 *value = strchr(sym, '=');
+    如 (value)
         *value++ = '\0';
     tcc_define_symbol(s1, sym, value);
     tcc_free(sym);
 }
 
-static void args_parser_add_file(TCCState *s, const char* filename, int filetype)
+静态 空 args_parser_add_file(TCCState *s, 不变 字* filename, 整 filetype)
 {
-    struct filespec *f = tcc_malloc(sizeof *f + strlen(filename));
+    结构 filespec *f = tcc_malloc(求长度 *f + strlen(filename));
     f->type = filetype;
     f->alacarte = s->alacarte_link;
     strcpy(f->name, filename);
     dynarray_add(&s->files, &s->nb_files, f);
 }
 
-static int args_parser_make_argv(const char *r, int *argc, char ***argv)
+静态 整 args_parser_make_argv(不变 字 *r, 整 *argc, 字 ***argv)
 {
-    int ret = 0, q, c;
+    整 ret = 0, q, c;
     CString str;
-    for(;;) {
-        while (c = (unsigned char)*r, c && c <= ' ')
-	    ++r;
-        if (c == 0)
-            break;
+    对于(;;) {
+        当 (c = (无符 字)*r, c && c <= ' ')
+            ++r;
+        如 (c == 0)
+            跳出;
         q = 0;
         cstr_new(&str);
-        while (c = (unsigned char)*r, c) {
+        当 (c = (无符 字)*r, c) {
             ++r;
-            if (c == '\\' && (*r == '"' || *r == '\\')) {
+            如 (c == '\\' && (*r == '"' || *r == '\\')) {
                 c = *r++;
-            } else if (c == '"') {
+            } 另 如 (c == '"') {
                 q = !q;
-                continue;
-            } else if (q == 0 && c <= ' ') {
-                break;
+                继续;
+            } 另 如 (q == 0 && c <= ' ') {
+                跳出;
             }
             cstr_ccat(&str, c);
         }
@@ -1630,31 +1630,31 @@ static int args_parser_make_argv(const char *r, int *argc, char ***argv)
         cstr_free(&str);
         ++ret;
     }
-    return ret;
+    返回 ret;
 }
 
 /* read list file */
-static void args_parser_listfile(TCCState *s,
-    const char *filename, int optind, int *pargc, char ***pargv)
+静态 空 args_parser_listfile(TCCState *s,
+    不变 字 *filename, 整 optind, 整 *pargc, 字 ***pargv)
 {
-    int fd, i;
+    整 fd, i;
     size_t len;
-    char *p;
-    int argc = 0;
-    char **argv = NULL;
+    字 *p;
+    整 argc = 0;
+    字 **argv = NULL;
 
     fd = open(filename, O_RDONLY | O_BINARY);
-    if (fd < 0)
+    如 (fd < 0)
         tcc_error("listfile '%s' not found", filename);
 
     len = lseek(fd, 0, SEEK_END);
     p = tcc_malloc(len + 1), p[len] = 0;
     lseek(fd, 0, SEEK_SET), read(fd, p, len), close(fd);
 
-    for (i = 0; i < *pargc; ++i)
-        if (i == optind)
+    对于 (i = 0; i < *pargc; ++i)
+        如 (i == optind)
             args_parser_make_argv(p, &argc, &argv);
-        else
+        另
             dynarray_add(&argv, &argc, tcc_strdup((*pargv)[i]));
 
     tcc_free(p);
@@ -1662,326 +1662,326 @@ static void args_parser_listfile(TCCState *s,
     *pargc = s->argc = argc, *pargv = s->argv = argv;
 }
 
-PUB_FUNC int tcc_parse_args(TCCState *s, int *pargc, char ***pargv, int optind)
+PUB_FUNC 整 tcc_parse_args(TCCState *s, 整 *pargc, 字 ***pargv, 整 optind)
 {
-    const TCCOption *popt;
-    const char *optarg, *r;
-    const char *run = NULL;
-    int last_o = -1;
-    int x;
+    不变 TCCOption *popt;
+    不变 字 *optarg, *r;
+    不变 字 *run = NULL;
+    整 last_o = -1;
+    整 x;
     CString linker_arg; /* collect -Wl options */
-    char buf[1024];
-    int tool = 0, arg_start = 0, noaction = optind;
-    char **argv = *pargv;
-    int argc = *pargc;
+    字 buf[1024];
+    整 tool = 0, arg_start = 0, noaction = optind;
+    字 **argv = *pargv;
+    整 argc = *pargc;
 
     cstr_new(&linker_arg);
 
-    while (optind < argc) {
+    当 (optind < argc) {
         r = argv[optind];
-        if (r[0] == '@' && r[1] != '\0') {
+        如 (r[0] == '@' && r[1] != '\0') {
             args_parser_listfile(s, r + 1, optind, &argc, &argv);
-	    continue;
+            继续;
         }
         optind++;
-        if (tool) {
-            if (r[0] == '-' && r[1] == 'v' && r[2] == 0)
+        如 (tool) {
+            如 (r[0] == '-' && r[1] == 'v' && r[2] == 0)
                 ++s->verbose;
-            continue;
+            继续;
         }
 reparse:
-        if (r[0] != '-' || r[1] == '\0') {
-            if (r[0] != '@') /* allow "tcc file(s) -run @ args ..." */
+        如 (r[0] != '-' || r[1] == '\0') {
+            如 (r[0] != '@') /* allow "tcc file(s) -run @ args ..." */
                 args_parser_add_file(s, r, s->filetype);
-            if (run) {
+            如 (run) {
                 tcc_set_options(s, run);
                 arg_start = optind - 1;
-                break;
+                跳出;
             }
-            continue;
+            继续;
         }
 
         /* find option in table */
-        for(popt = tcc_options; ; ++popt) {
-            const char *p1 = popt->name;
-            const char *r1 = r + 1;
-            if (p1 == NULL)
+        对于(popt = tcc_options; ; ++popt) {
+            不变 字 *p1 = popt->name;
+            不变 字 *r1 = r + 1;
+            如 (p1 == NULL)
                 tcc_error("invalid option -- '%s'", r);
-            if (!strstart(p1, &r1))
-                continue;
+            如 (!strstart(p1, &r1))
+                继续;
             optarg = r1;
-            if (popt->flags & TCC_OPTION_HAS_ARG) {
-                if (*r1 == '\0' && !(popt->flags & TCC_OPTION_NOSEP)) {
-                    if (optind >= argc)
+            如 (popt->flags & TCC_OPTION_HAS_ARG) {
+                如 (*r1 == '\0' && !(popt->flags & TCC_OPTION_NOSEP)) {
+                    如 (optind >= argc)
                 arg_err:
                         tcc_error("argument to '%s' is missing", r);
                     optarg = argv[optind++];
                 }
-            } else if (*r1 != '\0')
-                continue;
-            break;
+            } 另 如 (*r1 != '\0')
+                继续;
+            跳出;
         }
 
-        switch(popt->index) {
-        case TCC_OPTION_HELP:
-            return OPT_HELP;
-        case TCC_OPTION_HELP2:
-            return OPT_HELP2;
-        case TCC_OPTION_I:
+        转接(popt->index) {
+        事例 TCC_OPTION_HELP:
+            返回 OPT_HELP;
+        事例 TCC_OPTION_HELP2:
+            返回 OPT_HELP2;
+        事例 TCC_OPTION_I:
             tcc_add_include_path(s, optarg);
-            break;
-        case TCC_OPTION_D:
+            跳出;
+        事例 TCC_OPTION_D:
             parse_option_D(s, optarg);
-            break;
-        case TCC_OPTION_U:
+            跳出;
+        事例 TCC_OPTION_U:
             tcc_undefine_symbol(s, optarg);
-            break;
-        case TCC_OPTION_L:
+            跳出;
+        事例 TCC_OPTION_L:
             tcc_add_library_path(s, optarg);
-            break;
-        case TCC_OPTION_B:
+            跳出;
+        事例 TCC_OPTION_B:
             /* set tcc utilities path (mainly for tcc development) */
             tcc_set_lib_path(s, optarg);
-            break;
-        case TCC_OPTION_l:
+            跳出;
+        事例 TCC_OPTION_l:
             args_parser_add_file(s, optarg, AFF_TYPE_LIB);
             s->nb_libraries++;
-            break;
-        case TCC_OPTION_pthread:
+            跳出;
+        事例 TCC_OPTION_pthread:
             parse_option_D(s, "_REENTRANT");
             s->option_pthread = 1;
-            break;
-        case TCC_OPTION_bench:
+            跳出;
+        事例 TCC_OPTION_bench:
             s->do_bench = 1;
-            break;
-#ifdef CONFIG_TCC_BACKTRACE
-        case TCC_OPTION_bt:
+            跳出;
+#如定义 CONFIG_TCC_BACKTRACE
+        事例 TCC_OPTION_bt:
             tcc_set_num_callers(atoi(optarg));
-            break;
-#endif
-#ifdef CONFIG_TCC_BCHECK
-        case TCC_OPTION_b:
+            跳出;
+#了如
+#如定义 CONFIG_TCC_BCHECK
+        事例 TCC_OPTION_b:
             s->do_bounds_check = 1;
             s->do_debug = 1;
-            break;
-#endif
-        case TCC_OPTION_g:
+            跳出;
+#了如
+        事例 TCC_OPTION_g:
             s->do_debug = 1;
-            break;
-        case TCC_OPTION_c:
+            跳出;
+        事例 TCC_OPTION_c:
             x = TCC_OUTPUT_OBJ;
         set_output_type:
-            if (s->output_type)
+            如 (s->output_type)
                 tcc_warning("-%s: overriding compiler action already specified", popt->name);
             s->output_type = x;
-            break;
-        case TCC_OPTION_d:
-            if (*optarg == 'D')
+            跳出;
+        事例 TCC_OPTION_d:
+            如 (*optarg == 'D')
                 s->dflag = 3;
-            else if (*optarg == 'M')
+            另 如 (*optarg == 'M')
                 s->dflag = 7;
-            else if (*optarg == 't')
+            另 如 (*optarg == 't')
                 s->dflag = 16;
-            else if (isnum(*optarg))
+            另 如 (isnum(*optarg))
                 g_debug = atoi(optarg);
-            else
-                goto unsupported_option;
-            break;
-        case TCC_OPTION_static:
+            另
+                跳转 unsupported_option;
+            跳出;
+        事例 TCC_OPTION_static:
             s->static_link = 1;
-            break;
-        case TCC_OPTION_std:
-    	    /* silently ignore, a current purpose:
-    	       allow to use a tcc as a reference compiler for "make test" */
-            break;
-        case TCC_OPTION_shared:
+            跳出;
+        事例 TCC_OPTION_std:
+            /* silently ignore, a current purpose:
+               allow to use a tcc as a reference compiler for "make test" */
+            跳出;
+        事例 TCC_OPTION_shared:
             x = TCC_OUTPUT_DLL;
-            goto set_output_type;
-        case TCC_OPTION_soname:
+            跳转 set_output_type;
+        事例 TCC_OPTION_soname:
             s->soname = tcc_strdup(optarg);
-            break;
-        case TCC_OPTION_o:
-            if (s->outfile) {
+            跳出;
+        事例 TCC_OPTION_o:
+            如 (s->outfile) {
                 tcc_warning("multiple -o option");
                 tcc_free(s->outfile);
             }
             s->outfile = tcc_strdup(optarg);
-            break;
-        case TCC_OPTION_r:
+            跳出;
+        事例 TCC_OPTION_r:
             /* generate a .o merging several output files */
             s->option_r = 1;
             x = TCC_OUTPUT_OBJ;
-            goto set_output_type;
-        case TCC_OPTION_isystem:
+            跳转 set_output_type;
+        事例 TCC_OPTION_isystem:
             tcc_add_sysinclude_path(s, optarg);
-            break;
-        case TCC_OPTION_iwithprefix:
-            snprintf(buf, sizeof buf, "{B}/%s", optarg);
+            跳出;
+        事例 TCC_OPTION_iwithprefix:
+            snprintf(buf, 求长度 buf, "{B}/%s", optarg);
             tcc_add_sysinclude_path(s, buf);
-            break;
-	case TCC_OPTION_include:
-	    dynarray_add(&s->cmd_include_files,
-			 &s->nb_cmd_include_files, tcc_strdup(optarg));
-	    break;
-        case TCC_OPTION_nostdinc:
+            跳出;
+        事例 TCC_OPTION_include:
+            dynarray_add(&s->cmd_include_files,
+                         &s->nb_cmd_include_files, tcc_strdup(optarg));
+            跳出;
+        事例 TCC_OPTION_nostdinc:
             s->nostdinc = 1;
-            break;
-        case TCC_OPTION_nostdlib:
+            跳出;
+        事例 TCC_OPTION_nostdlib:
             s->nostdlib = 1;
-            break;
-        case TCC_OPTION_run:
-#ifndef TCC_IS_NATIVE
+            跳出;
+        事例 TCC_OPTION_run:
+#如未定义 TCC_IS_NATIVE
             tcc_error("-run is not available in a cross compiler");
-#endif
+#了如
             run = optarg;
             x = TCC_OUTPUT_MEMORY;
-            goto set_output_type;
-        case TCC_OPTION_v:
-            do ++s->verbose; while (*optarg++ == 'v');
+            跳转 set_output_type;
+        事例 TCC_OPTION_v:
+            运行 ++s->verbose; 当 (*optarg++ == 'v');
             ++noaction;
-            break;
-        case TCC_OPTION_f:
-            if (set_flag(s, options_f, optarg) < 0)
-                goto unsupported_option;
-            break;
-#ifdef TCC_TARGET_ARM
-        case TCC_OPTION_mfloat_abi:
+            跳出;
+        事例 TCC_OPTION_f:
+            如 (set_flag(s, options_f, optarg) < 0)
+                跳转 unsupported_option;
+            跳出;
+#如定义 TCC_TARGET_ARM
+        事例 TCC_OPTION_mfloat_abi:
             /* tcc doesn't support soft float yet */
-            if (!strcmp(optarg, "softfp")) {
+            如 (!strcmp(optarg, "softfp")) {
                 s->float_abi = ARM_SOFTFP_FLOAT;
                 tcc_undefine_symbol(s, "__ARM_PCS_VFP");
-            } else if (!strcmp(optarg, "hard"))
+            } 另 如 (!strcmp(optarg, "hard"))
                 s->float_abi = ARM_HARD_FLOAT;
-            else
+            另
                 tcc_error("unsupported float abi '%s'", optarg);
-            break;
-#endif
-        case TCC_OPTION_m:
-            if (set_flag(s, options_m, optarg) < 0) {
-                if (x = atoi(optarg), x != 32 && x != 64)
-                    goto unsupported_option;
-                if (PTR_SIZE != x/8)
-                    return x;
+            跳出;
+#了如
+        事例 TCC_OPTION_m:
+            如 (set_flag(s, options_m, optarg) < 0) {
+                如 (x = atoi(optarg), x != 32 && x != 64)
+                    跳转 unsupported_option;
+                如 (PTR_SIZE != x/8)
+                    返回 x;
                 ++noaction;
             }
-            break;
-        case TCC_OPTION_W:
-            if (set_flag(s, options_W, optarg) < 0)
-                goto unsupported_option;
-            break;
-        case TCC_OPTION_w:
+            跳出;
+        事例 TCC_OPTION_W:
+            如 (set_flag(s, options_W, optarg) < 0)
+                跳转 unsupported_option;
+            跳出;
+        事例 TCC_OPTION_w:
             s->warn_none = 1;
-            break;
-        case TCC_OPTION_rdynamic:
+            跳出;
+        事例 TCC_OPTION_rdynamic:
             s->rdynamic = 1;
-            break;
-        case TCC_OPTION_Wl:
-            if (linker_arg.size)
+            跳出;
+        事例 TCC_OPTION_Wl:
+            如 (linker_arg.size)
                 --linker_arg.size, cstr_ccat(&linker_arg, ',');
             cstr_cat(&linker_arg, optarg, 0);
-            if (tcc_set_linker(s, linker_arg.data))
+            如 (tcc_set_linker(s, linker_arg.data))
                 cstr_free(&linker_arg);
-            break;
-	case TCC_OPTION_Wp:
-	    r = optarg;
-	    goto reparse;
-        case TCC_OPTION_E:
+            跳出;
+        事例 TCC_OPTION_Wp:
+            r = optarg;
+            跳转 reparse;
+        事例 TCC_OPTION_E:
             x = TCC_OUTPUT_PREPROCESS;
-            goto set_output_type;
-        case TCC_OPTION_P:
+            跳转 set_output_type;
+        事例 TCC_OPTION_P:
             s->Pflag = atoi(optarg) + 1;
-            break;
-        case TCC_OPTION_MD:
+            跳出;
+        事例 TCC_OPTION_MD:
             s->gen_deps = 1;
-            break;
-        case TCC_OPTION_MF:
+            跳出;
+        事例 TCC_OPTION_MF:
             s->deps_outfile = tcc_strdup(optarg);
-            break;
-        case TCC_OPTION_dumpversion:
+            跳出;
+        事例 TCC_OPTION_dumpversion:
             printf ("%s\n", TCC_VERSION);
             exit(0);
-            break;
-        case TCC_OPTION_x:
-            if (*optarg == 'c')
+            跳出;
+        事例 TCC_OPTION_x:
+            如 (*optarg == 'c')
                 s->filetype = AFF_TYPE_C;
-            else if (*optarg == 'a')
+            另 如 (*optarg == 'a')
                 s->filetype = AFF_TYPE_ASMPP;
-            else if (*optarg == 'n')
+            另 如 (*optarg == 'n')
                 s->filetype = AFF_TYPE_NONE;
-            else
+            另
                 tcc_warning("unsupported language '%s'", optarg);
-            break;
-        case TCC_OPTION_O:
+            跳出;
+        事例 TCC_OPTION_O:
             last_o = atoi(optarg);
-            break;
-        case TCC_OPTION_print_search_dirs:
+            跳出;
+        事例 TCC_OPTION_print_search_dirs:
             x = OPT_PRINT_DIRS;
-            goto extra_action;
-        case TCC_OPTION_impdef:
+            跳转 extra_action;
+        事例 TCC_OPTION_impdef:
             x = OPT_IMPDEF;
-            goto extra_action;
-        case TCC_OPTION_ar:
+            跳转 extra_action;
+        事例 TCC_OPTION_ar:
             x = OPT_AR;
         extra_action:
             arg_start = optind - 1;
-            if (arg_start != noaction)
+            如 (arg_start != noaction)
                 tcc_error("cannot parse %s here", r);
             tool = x;
-            break;
-        case TCC_OPTION_traditional:
-        case TCC_OPTION_pedantic:
-        case TCC_OPTION_pipe:
-        case TCC_OPTION_s:
+            跳出;
+        事例 TCC_OPTION_traditional:
+        事例 TCC_OPTION_pedantic:
+        事例 TCC_OPTION_pipe:
+        事例 TCC_OPTION_s:
             /* ignored */
-            break;
-        default:
+            跳出;
+        缺省:
 unsupported_option:
-            if (s->warn_unsupported)
+            如 (s->warn_unsupported)
                 tcc_warning("unsupported option '%s'", r);
-            break;
+            跳出;
         }
     }
-    if (last_o > 0)
+    如 (last_o > 0)
         tcc_define_symbol(s, "__OPTIMIZE__", NULL);
-    if (linker_arg.size) {
+    如 (linker_arg.size) {
         r = linker_arg.data;
-        goto arg_err;
+        跳转 arg_err;
     }
     *pargc = argc - arg_start;
     *pargv = argv + arg_start;
-    if (tool)
-        return tool;
-    if (optind != noaction)
-        return 0;
-    if (s->verbose == 2)
-        return OPT_PRINT_DIRS;
-    if (s->verbose)
-        return OPT_V;
-    return OPT_HELP;
+    如 (tool)
+        返回 tool;
+    如 (optind != noaction)
+        返回 0;
+    如 (s->verbose == 2)
+        返回 OPT_PRINT_DIRS;
+    如 (s->verbose)
+        返回 OPT_V;
+    返回 OPT_HELP;
 }
 
-LIBTCCAPI void tcc_set_options(TCCState *s, const char *r)
+LIBTCCAPI 空 tcc_set_options(TCCState *s, 不变 字 *r)
 {
-    char **argv = NULL;
-    int argc = 0;
+    字 **argv = NULL;
+    整 argc = 0;
     args_parser_make_argv(r, &argc, &argv);
     tcc_parse_args(s, &argc, &argv, 0);
     dynarray_reset(&argv, &argc);
 }
 
-PUB_FUNC void tcc_print_stats(TCCState *s, unsigned total_time)
+PUB_FUNC 空 tcc_print_stats(TCCState *s, 无符 total_time)
 {
-    if (total_time < 1)
+    如 (total_time < 1)
         total_time = 1;
-    if (total_bytes < 1)
+    如 (total_bytes < 1)
         total_bytes = 1;
     fprintf(stderr, "* %d idents, %d lines, %d bytes\n"
                     "* %0.3f s, %u lines/s, %0.1f MB/s\n",
            tok_ident - TOK_IDENT, total_lines, total_bytes,
-           (double)total_time/1000,
-           (unsigned)total_lines*1000/total_time,
-           (double)total_bytes/1000/total_time);
-#ifdef MEM_DEBUG
+           (双精)total_time/1000,
+           (无符)total_lines*1000/total_time,
+           (双精)total_bytes/1000/total_time);
+#如定义 MEM_DEBUG
     fprintf(stderr, "* %d bytes memory used\n", mem_max_size);
-#endif
+#了如
 }

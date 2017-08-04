@@ -1,95 +1,59 @@
-Tiny C Compiler - C Scripting Everywhere - The Smallest ANSI C compiler
+小习编译器Alpha - 基于TinyCC的中文编译器 - 中文自举编译器第一部分
 -----------------------------------------------------------------------
 
 Features:
 --------
 
-- SMALL! You can compile and execute C code everywhere, for example on
-  rescue disks.
-
-- FAST! tcc generates optimized x86 code. No byte code
-  overhead. Compile, assemble and link about 7 times faster than 'gcc
-  -O0'.
-
-- UNLIMITED! Any C dynamic library can be used directly. TCC is
-  heading torward full ISOC99 compliance. TCC can of course compile
-  itself.
-
-- SAFE! tcc includes an optional memory and bound checker. Bound
-  checked code can be mixed freely with standard code.
-
-- Compile and execute C source directly. No linking or assembly
-  necessary. Full C preprocessor included. 
-
-- C script supported : just add '#!/usr/local/bin/tcc -run' at the first
-  line of your C source, and execute it directly from the command
-  line.
+基于TinyCC的中文编译器，添加了中文关键字解析代码。
+兼容原 TinyCC 所有的 Features。
 
 Documentation:
 -------------
 
 1) Installation on a i386/x86_64/arm Linux/OSX/FreeBSD host
 
-   ./configure
+目前调试是在 MingW 上进行
+
+   1. 用gcc编译并安装，在MingW上如不指定路径将默认到C盘，且没有/usr路径
+   ./configure --prefix=/local/tcc
    make
-   make test
    make install
+   
+   目前已经可以编译中文代码，见Examples
 
-   Notes: For OSX and FreeBSD, gmake should be used instead of make.
-   For Windows read tcc-win32.txt.
-
-makeinfo must be installed to compile the doc.  By default, tcc is
-installed in /usr/local/bin.  ./configure --help  shows configuration
-options.
-
+   2. 可选，自举
+   ./configure --prefix=/local/tcc --cc=/local/tcc/tcc.exe
+   make
+   make install
+   
 
 2) Introduction
 
-We assume here that you know ANSI C. Look at the example ex1.c to know
-what the programs look like.
+一直对编译器比较感兴趣，总想改出一个中文编译器。
+很早之前已经可以对TinyCC进行改造了，但一直希望用clang或gcc改一个C/C++的纯中文编译器。
+但clang和gcc的自身编译就很麻烦，中间问题很多，我一直都没有搞定。
+所以还有先用TinyCC搞一个C语言中文版，这样快多了。
 
-The include file <tcclib.h> can be used if you want a small basic libc
-include support (especially useful for floppy disks). Of course, you
-can also use standard headers, although they are slower to compile.
+这个目前这个命名为小习编译器。若是以后整出了一个C++中文编译器，就叫习大大，毕竟习加加已经有人叫了。
 
-You can begin your C script with '#!/usr/local/bin/tcc -run' on the first
-line and set its execute bits (chmod a+x your_script). Then, you can
-launch the C code as a shell or perl script :-) The command line
-arguments are put in 'argc' and 'argv' of the main functions, as in
-ANSI C.
+   小习编译器分 Alpha 和 Beta 两版。
+   小习编译器Alpha在TinyCC 基础上添加中文关键字
+   小习编译器Beta 在 小习编译器Alpha 基础上将原英文关键字全替换成中文。
+
+   小习编译器Beta自举 需要先编译小习编译器Alpha，并安装。
+   然后用小习编译器Alpha 编译 小习编译器Beta, 并安装
+   最后用小习编译器Beta 编译自身。
 
 3) Examples
 
-ex1.c: simplest example (hello world). Can also be launched directly
-as a script: './ex1.c'.
-
-ex2.c: more complicated example: find a number with the four
-operations given a list of numbers (benchmark).
-
-ex3.c: compute fibonacci numbers (benchmark).
-
-ex4.c: more complicated: X11 program. Very complicated test in fact
-because standard headers are being used ! As for ex1.c, can also be launched
-directly as a script: './ex4.c'.
-
-ex5.c: 'hello world' with standard glibc headers.
-
-tcc.c: TCC can of course compile itself. Used to check the code
-generator.
-
-tcctest.c: auto test for TCC which tests many subtle possible bugs. Used
-when doing 'make test'.
-
-4) Full Documentation
-
-Please read tcc-doc.html to have all the features of TCC.
-
-Additional information is available for the Windows port in tcc-win32.txt.
+_ex3.c: 计算 斐波那契 数 (中文编程).
+   cd examples
+   /local/tcc/tcc.exe _ex3.c
+   ./_ex3.exe 6
 
 License:
 -------
 
-TCC is distributed under the GNU Lesser General Public License (see
-COPYING file).
+小习编译器 遵循 GNU Lesser General Public License。详细请见 COPYING 文件。
 
-Fabrice Bellard.
+XLCH.

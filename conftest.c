@@ -1,87 +1,87 @@
-#include <stdio.h>
+#包含 <stdio.h>
 
 /* Define architecture */
-#if defined(__i386__) || defined _M_IX86
-# define TRIPLET_ARCH "i386"
-#elif defined(__x86_64__) || defined _M_AMD64
-# define TRIPLET_ARCH "x86_64"
-#elif defined(__arm__)
-# define TRIPLET_ARCH "arm"
-#elif defined(__aarch64__)
-# define TRIPLET_ARCH "aarch64"
-#else
-# define TRIPLET_ARCH "unknown"
-#endif
+#如 已定义(__i386__) || 已定义 _M_IX86
+# 定义 TRIPLET_ARCH "i386"
+#另如 已定义(__x86_64__) || 已定义 _M_AMD64
+# 定义 TRIPLET_ARCH "x86_64"
+#另如 已定义(__arm__)
+# 定义 TRIPLET_ARCH "arm"
+#另如 已定义(__aarch64__)
+# 定义 TRIPLET_ARCH "aarch64"
+#另
+# 定义 TRIPLET_ARCH "unknown"
+#了如
 
 /* Define OS */
-#if defined (__linux__)
-# define TRIPLET_OS "linux"
-#elif defined (__FreeBSD__) || defined (__FreeBSD_kernel__)
-# define TRIPLET_OS "kfreebsd"
-#elif defined _WIN32
-# define TRIPLET_OS "win32"
-#elif !defined (__GNU__)
-# define TRIPLET_OS "unknown"
-#endif
+#如 已定义 (__linux__)
+# 定义 TRIPLET_OS "linux"
+#另如 已定义 (__FreeBSD__) || 已定义 (__FreeBSD_kernel__)
+# 定义 TRIPLET_OS "kfreebsd"
+#另如 已定义 _WIN32
+# 定义 TRIPLET_OS "win32"
+#另如 !已定义 (__GNU__)
+# 定义 TRIPLET_OS "unknown"
+#了如
 
 /* Define calling convention and ABI */
-#if defined (__ARM_EABI__)
-# if defined (__ARM_PCS_VFP)
-#  define TRIPLET_ABI "gnueabihf"
-# else
-#  define TRIPLET_ABI "gnueabi"
-# endif
-#else
-# define TRIPLET_ABI "gnu"
-#endif
+#如 已定义 (__ARM_EABI__)
+# 如 已定义 (__ARM_PCS_VFP)
+#  定义 TRIPLET_ABI "gnueabihf"
+# 另
+#  定义 TRIPLET_ABI "gnueabi"
+# 了如
+#另
+# 定义 TRIPLET_ABI "gnu"
+#了如
 
-#if defined _WIN32
-# define TRIPLET TRIPLET_ARCH "-" TRIPLET_OS
-#elif defined __GNU__
-# define TRIPLET TRIPLET_ARCH "-" TRIPLET_ABI
-#else
-# define TRIPLET TRIPLET_ARCH "-" TRIPLET_OS "-" TRIPLET_ABI
-#endif
+#如 已定义 _WIN32
+# 定义 TRIPLET TRIPLET_ARCH "-" TRIPLET_OS
+#另如 已定义 __GNU__
+# 定义 TRIPLET TRIPLET_ARCH "-" TRIPLET_ABI
+#另
+# 定义 TRIPLET TRIPLET_ARCH "-" TRIPLET_OS "-" TRIPLET_ABI
+#了如
 
-#if defined(_WIN32)
-int _CRT_glob = 0;
-#endif
+#如 已定义(_WIN32)
+整 _CRT_glob = 0;
+#了如
 
-int main(int argc, char *argv[])
+整 main(整 argc, 字 *argv[])
 {
-    switch(argc == 2 ? argv[1][0] : 0) {
-        case 'b':
+    转接(argc == 2 ? argv[1][0] : 0) {
+        事例 'b':
         {
-            volatile unsigned foo = 0x01234567;
-            puts(*(unsigned char*)&foo == 0x67 ? "no" : "yes");
-            break;
+            易变 无符 foo = 0x01234567;
+            puts(*(无符 字*)&foo == 0x67 ? "no" : "yes");
+            跳出;
         }
-#ifdef __GNUC__
-        case 'm':
+#如定义 __GNUC__
+        事例 'm':
             printf("%d\n", __GNUC_MINOR__);
-            break;
-        case 'v':
+            跳出;
+        事例 'v':
             printf("%d\n", __GNUC__);
-            break;
-#elif defined __TINYC__
-        case 'v':
+            跳出;
+#另如 已定义 __TINYC__
+        事例 'v':
             puts("0");
-            break;
-        case 'm':
+            跳出;
+        事例 'm':
             printf("%d\n", __TINYC__);
-            break;
-#else
-        case 'm':
-        case 'v':
+            跳出;
+#另
+        事例 'm':
+        事例 'v':
             puts("0");
-            break;
-#endif
-        case 't':
+            跳出;
+#了如
+        事例 't':
             puts(TRIPLET);
-            break;
+            跳出;
 
-        default:
-            break;
+        缺省:
+            跳出;
     }
-    return 0;
+    返回 0;
 }
