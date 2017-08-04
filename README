@@ -1,4 +1,4 @@
-小习编译器Alpha - 基于TinyCC的中文编译器 - 中文自举编译器第一部分
+小习编译器Bate - 基于TinyCC的中文编译器 - 中文自举编译器第二部分
 -----------------------------------------------------------------------
 
 Features:
@@ -14,6 +14,7 @@ Documentation:
 
 目前调试是在 MingW 上进行
 
+小习编译器Alpha：
    1. 用gcc编译并安装，在MingW上如不指定路径将默认到C盘，且没有/usr路径
    ./configure --prefix=/local/tcc
    make
@@ -25,7 +26,17 @@ Documentation:
    ./configure --prefix=/local/tcc --cc=/local/tcc/tcc.exe
    make
    make install
-   
+
+小习编译器Bate：
+   1. 用已经编译并安装的小习编译器Alpha进行编译
+   ./configure --prefix=/local/tcc --cc=/local/tcc/tcc.exe
+   make
+   make install
+
+   2. 可选，自举
+   ./configure --prefix=/local/tcc --cc=/local/tcc/tcc.exe
+   make
+   make install
 
 2) Introduction
 
